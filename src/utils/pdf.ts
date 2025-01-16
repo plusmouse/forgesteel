@@ -41,6 +41,16 @@ export class PDFExport {
         'top speed': HeroLogic.getSpeed(obj),
         'top stability': HeroLogic.getStability(obj),
         'top size': sizeData.value + sizeData.mod,
+        'Current Stamina': HeroLogic.getStamina(obj) - obj.state.staminaDamage,
+        'stamina max': HeroLogic.getStamina(obj),
+        'winded count': Math.floor(HeroLogic.getStamina(obj) / 2),
+        'dying count': -Math.floor(HeroLogic.getStamina(obj) / 2),
+        'recov stamina': HeroLogic.getRecoveryValue(obj),
+        'recov max': HeroLogic.getRecoveries(obj),
+        'Recoveries': HeroLogic.getRecoveries(obj) - obj.state.recoveriesUsed,
+        'resource name': obj.class.heroicResource,
+        'Resource Count': obj.state.heroicResource,
+        'Surges': obj.state.surges,
       }
       const toggles = {}
 
