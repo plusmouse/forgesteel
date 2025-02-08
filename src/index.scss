@@ -1,24 +1,24 @@
 @font-face {
 	font-family: 'PT Sans';
-	src: url('../src/assets/fonts/PTSans-Regular.ttf') format('truetype');
+	src: url('../src/assets/fonts/pt/regular.ttf') format('truetype');
 	font-weight: 400;
 	font-style: normal;
 }
 @font-face {
 	font-family: 'PT Sans';
-	src: url('../src/assets/fonts/PTSans-Bold.ttf') format('truetype');
+	src: url('../src/assets/fonts/pt/bold.ttf') format('truetype');
 	font-weight: 700;
 	font-style: normal;
 }
 @font-face {
 	font-family: 'PT Sans';
-	src: url('../src/assets/fonts/PTSans-Italic.ttf') format('truetype');
+	src: url('../src/assets/fonts/pt/italic.ttf') format('truetype');
 	font-weight: 400;
 	font-style: italic;
 }
 @font-face {
 	font-family: 'PT Sans';
-	src: url('../src/assets/fonts/PTSans-BoldItalic.ttf') format('truetype');
+	src: url('../src/assets/fonts/pt/bold-italic.ttf') format('truetype');
 	font-weight: 700;
 	font-style: italic;
 }
@@ -26,7 +26,6 @@
 * {
 	font-family: 'PT Sans', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif !important;
 	box-sizing: border-box;
-	user-select: none;
 	transition:
 		background-color ease-in-out 0.2s,
 		background-image ease-in-out 0.2s,
@@ -83,6 +82,12 @@ p,
 	&.small-text {
 		font-size: 10px;
 	}
+
+	br {
+		content: '';
+		display: block;
+		height: 10px;
+	}
 }
 
 b {
@@ -136,6 +141,7 @@ td {
 	>.ant-collapse-item {
 		>.ant-collapse-header {
 			align-items: center;
+			user-select: none;
 
 			>.ant-collapse-extra {
 				display: flex;
@@ -178,6 +184,17 @@ td {
 .ant-drawer {
 	.ant-drawer-content {
 		.ant-drawer-body {
+			padding: 0;
+		}
+	}
+}
+
+.ant-dropdown {
+	.ant-dropdown-menu {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+
+		.ant-dropdown-menu-item {
 			padding: 0;
 		}
 	}
@@ -278,7 +295,8 @@ td {
 	}
 
 	p,
-	.ds-text {
+	.ds-text,
+	ul {
 		color: rgba(255, 255, 255, 0.88);
 	}
 

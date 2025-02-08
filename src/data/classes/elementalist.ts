@@ -12,6 +12,7 @@ export const elementalist: HeroClass = {
 	name: 'Elementalist',
 	description: `
 Air for movement. Earth for permanence. Fire for destruction. Water for change. Green for growth. Rot for death. Void for the mystery. Years of study and practice and poring over tomes brought you the revelations that allow you to manipulate these building blocks of reality. Now you use your mastery of the seven elements to destroy, create, and warp the world with magic.
+
 As an elementalist, you can unleash your wrath across a field of foes, put an enemy exactly where you want them, debilitate foes with harmful effects, ward yourself and allies against danger, manipulate terrain, warp space, and more. Your choice of elemental specialization determines which of these things you do best.`,
 	heroicResource: 'Essence',
 	subclassName: 'Elemental Specialization',
@@ -53,7 +54,7 @@ As an elementalist, you can unleash your wrath across a field of foes, put an en
 						description: 'You hurl a ball of elemental energy at an unsuspecting foe.',
 						type: FactoryLogic.type.createAction(),
 						keywords: [ AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-						distance: [ FactoryLogic.distance.createRanged() ],
+						distance: [ FactoryLogic.distance.createRanged(10) ],
 						target: '1 creature or object',
 						powerRoll: FactoryLogic.createPowerRoll({
 							characteristic: [ Characteristic.Reason ],
@@ -69,8 +70,11 @@ As an elementalist, you can unleash your wrath across a field of foes, put an en
 					name: 'Persistent Magic',
 					description: `
 Some of your heroic abilities have a persistent effect entry. Whenever you use a persistent ability, you decide whether you want to maintain it, and start doing so immediately after you first use the ability. If you maintain a persistent ability in combat, you reduce the amount of essence you earn at the start of your turn by an amount equal to the ability’s persistent value, which enables the ability’s persistent effect. All your active persistent abilities end at the end of the encounter.
+
 You can’t maintain any abilities that would make you earn a negative amount of essence at the start of your turn or have a negative amount of essence outside of combat. You can stop maintaining an ability at any time (no action required).
+
 If you maintain the same ability on several targets and the effect includes a power roll, you make that roll once and apply the same effect to all targets. A creature can’t be affected by multiple instances of a persistent ability.
+
 If you take damage equal to or greater than 5 × your Reason score in one turn, you stop maintaining any persistent abilities. For instance, if you have a Reason score of 2 and are maintaining Instantaneous Excavation, taking 10 or more damage in one turn causes you to stop maintaining the ability.`
 				}),
 				FactoryLogic.feature.createAbility({
@@ -84,6 +88,7 @@ If you take damage equal to or greater than 5 × your Reason score in one turn, 
 						target: 'Self',
 						effect: `
 Choose one of the following effects:
+
 * You use the Knockback maneuver, but its distance becomes the range of your Hurl Element ability, and you use Reason instead of Might for the power roll.
 * You choose a creature within the distance of your Hurl Element ability and deal damage equal to your Reason score to them. The damage type can be acid, cold, corruption, fire, lightning, poison, or sonic.
 * You teleport up to a number of squares equal to your Reason score.`
@@ -267,7 +272,7 @@ Choose one of the following effects:
 			description: 'Your curse causes a foe’s flesh to rot off as spores that aid your allies.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Green, AbilityKeyword.Rot, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '1 creature',
 			cost: 'signature',
 			powerRoll: FactoryLogic.createPowerRoll({
@@ -284,7 +289,7 @@ Choose one of the following effects:
 			description: 'Two jets of flame lance out at your command.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Fire, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '2 creatures or objects',
 			cost: 'signature',
 			powerRoll: FactoryLogic.createPowerRoll({
@@ -317,7 +322,7 @@ Choose one of the following effects:
 			description: 'Whipping vines erupt from a foe’s body to grasp at another close by.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Green, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '1 creature',
 			cost: 'signature',
 			powerRoll: FactoryLogic.createPowerRoll({
@@ -350,7 +355,7 @@ Choose one of the following effects:
 			description: 'You inflict pain and doubt in equal measure.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike, AbilityKeyword.Void ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '1 creature or object',
 			cost: 'signature',
 			powerRoll: FactoryLogic.createPowerRoll({
@@ -383,7 +388,7 @@ Choose one of the following effects:
 			description: 'A jet of heavy fire erupts with elemental fury where it strikes.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Fire, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '1 creature or object',
 			cost: 'signature',
 			powerRoll: FactoryLogic.createPowerRoll({
@@ -421,7 +426,7 @@ Choose one of the following effects:
 			description: 'Fire engulfs a target of your choice and burns at your command.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Fire, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '1 creature or object',
 			cost: 3,
 			powerRoll: FactoryLogic.createPowerRoll({
@@ -443,7 +448,7 @@ Choose one of the following effects:
 			description: 'Mushrooms erupt from a foe, sapping their vitality to spread strengthening spores.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Green, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '1 creature',
 			cost: 3,
 			powerRoll: FactoryLogic.createPowerRoll({
@@ -499,7 +504,7 @@ Choose one of the following effects:
 			description: 'The surface of the world around you opens up at your command.',
 			type: FactoryLogic.type.createManeuver(),
 			keywords: [ AbilityKeyword.Earth, AbilityKeyword.Magic, AbilityKeyword.Ranged ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: 'Special',
 			cost: 5,
 			preEffect: 'You open up two holes with 1-square openings that are 4 squares deep, and which can be placed on any mundane surface within distance. You can place these holes next to each other to create fewer holes with wider openings. When the holes open, make a separate power roll for each creature on the ground above a hole and small enough to fall in. (You can’t get a critical hit with this power because it uses a maneuver.)',
@@ -522,7 +527,7 @@ Choose one of the following effects:
 			description: 'The material substance of a creature shreds away at your command.',
 			type: FactoryLogic.type.createManeuver(),
 			keywords: [ AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Void ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: 'Self or one ally',
 			cost: 5,
 			effect: 'Until the start of your next turn, the target can move through solid matter, ignores difficult terrain, and their movement can’t provoke opportunity attacks. If the target ends their turn inside solid matter, they are shunted out into the space where they entered it and this effect ends.',
@@ -562,6 +567,7 @@ Choose one of the following effects:
 			minLevel: 2,
 			effect: `
 Until the start of your next turn, the area gains the following effects:
+
 * You and each ally in the area can spend any number of Recoveries at the start of your turn once as a free maneuver.
 * The area is difficult terrain for enemies.
 * Any enemy who enters the area for the first time in a round or starts their turn there takes damage equal to your Reason score.`,
@@ -578,7 +584,7 @@ Until the start of your next turn, the area gains the following effects:
 			description: 'Burrow into their brains and take control!',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Green, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike, AbilityKeyword.Void ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '1 creature',
 			cost: 5,
 			minLevel: 2,
@@ -596,7 +602,7 @@ Until the start of your next turn, the area gains the following effects:
 			description: 'Your ally disappears, then reappears in a burst of fire!',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Fire, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Void ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: 'Self or one ally',
 			cost: 5,
 			minLevel: 2,
@@ -614,7 +620,7 @@ Until the start of your next turn, the area gains the following effects:
 			description: 'Wrap them up in fire and melting stone.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Earth, AbilityKeyword.Fire, AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: '1 creature',
 			cost: 5,
 			minLevel: 2,
@@ -631,7 +637,7 @@ Until the start of your next turn, the area gains the following effects:
 			description: 'With a flick of the wrist, you phase creatures out of existence.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike, AbilityKeyword.Void ],
-			distance: [ FactoryLogic.distance.createRanged() ],
+			distance: [ FactoryLogic.distance.createRanged(10) ],
 			target: 'Special',
 			cost: 7,
 			preEffect: 'The number of creatures you target with this ability is determined by your power roll.',
@@ -724,10 +730,11 @@ Until the start of your next turn, the area gains the following effects:
 								keywords: [ AbilityKeyword.Earth, AbilityKeyword.Magic, AbilityKeyword.Melee ],
 								distance: [ FactoryLogic.distance.createMelee() ],
 								target: 'Special',
-								cost: 3,
 								effect: `
 You touch a square containing mundane dirt, stone, or metal and create a 5 wall of the same material, which rises up out of the ground and must include the square you touched.
+
 Alternatively, you touch a structure made of mundane dirt, stone, or metal that takes up at least 2 squares. You can open a 1-square opening in the structure where you touched it.
+
 You can instead touch a doorway or other opening in a mundane dirt, stone, or metal surface that is no larger than 1 square. The opening is sealed by the same material that makes up the surface.`
 							})
 						}),
@@ -738,7 +745,7 @@ You can instead touch a doorway or other opening in a mundane dirt, stone, or me
 								description: 'You make yourself or an ally covered in protective stone.',
 								type: FactoryLogic.type.createTrigger('The target takes damage.'),
 								keywords: [ AbilityKeyword.Earth, AbilityKeyword.Magic, AbilityKeyword.Ranged ],
-								distance: [ FactoryLogic.distance.createRanged() ],
+								distance: [ FactoryLogic.distance.createRanged(10) ],
 								target: 'Self or 1 ally',
 								effect: 'The damage is halved.',
 								spend: [
@@ -816,7 +823,7 @@ You can instead touch a doorway or other opening in a mundane dirt, stone, or me
 								description: 'You add a little magic to an ally’s aggression at just the right time.',
 								type: FactoryLogic.type.createTrigger('The target force moves a creature or object.'),
 								keywords: [ AbilityKeyword.Fire, AbilityKeyword.Magic, AbilityKeyword.Ranged ],
-								distance: [ FactoryLogic.distance.createRanged() ],
+								distance: [ FactoryLogic.distance.createRanged(10) ],
 								target: 'Self or 1 ally',
 								effect: 'The forced movement distance gains a bonus equal to your Reason score.',
 								spend: [
@@ -870,6 +877,7 @@ You can instead touch a doorway or other opening in a mundane dirt, stone, or me
 							name: 'It Is the Soul Which Hears',
 							description: `
 You can speak with and understand Animals, Monstrosities, and Plant Creatures, even if they don’t share a language with you. Your ability to communicate with such creatures doesn’t make them inherently more intelligent, but you can use Reason in place of Presence while making tests to influence them.
+
 Additionally, whenever you touch a living plant that is not a Plant Creature, you can communicate with it telepathically. You can use words to communicate with the plant, but it communicates with you only by transmitting feelings and sensations that can’t be overly specific.`
 						}),
 						FactoryLogic.feature.createAbility({
@@ -879,7 +887,7 @@ Additionally, whenever you touch a living plant that is not a Plant Creature, yo
 								description: 'The power you channel grants the ability to get back in the fight.',
 								type: FactoryLogic.type.createTrigger('The target starts their turn.'),
 								keywords: [ AbilityKeyword.Green, AbilityKeyword.Magic, AbilityKeyword.Ranged ],
-								distance: [ FactoryLogic.distance.createRanged() ],
+								distance: [ FactoryLogic.distance.createRanged(10) ],
 								target: 'Self or 1 ally',
 								effect: 'The target can spend a Recovery.',
 								spend: [
@@ -901,8 +909,11 @@ Additionally, whenever you touch a living plant that is not a Plant Creature, yo
 							name: 'Disciple of the Green',
 							description: `
 You can use a maneuver to shapeshift into a type of creature on the Green Animal Forms table. While in animal form, you can speak, and you use your Reason score to make melee free strikes. Your statistics stay the same except as noted on the table.
+
 Each form has a prerequisite level that you must attain in this class before you can adopt it. Some animal forms grant you temporary Stamina. You lose this temporary Stamina when you revert back to your true form.
+
 You choose a specific animal and appearance while in animal form. For example, if you become a rodent, you might become a mouse, a rat, a shrew, or any other size 1T rodent who fits the animal type. When you take on animal form, your equipment either melds into your new form or falls unharmed to the ground, as you decide. When you return to your true form, any melded gear reappears on your person.
+
 You can revert back to your true form as a maneuver. You can’t enter an animal form unless you are in your true form. If you are dying, you revert to your true form and can’t turn back into an animal until you are no longer dying.
 
 | Animal Type | Level | Temporary Stamina | Speed         | Size | Stability Bonus | Melee Damage Bonus | Special                                                                                                                                                                                                      |
@@ -910,7 +921,7 @@ You can revert back to your true form as a maneuver. You can’t enter an animal
 | Canine      | 2nd   | 5                 | 7             | 1M   | +0              | +1/+1/+1           | You gain an edge on tests that involve smell.                                                                                                                                                                |
 | Fish        | 2nd   | 0                 | 5 (swim only) | 1T   | +0              | +0/+0/+0           | You can breathe in water but can’t breathe outside of it.                                                                                                                                                    |
 | Rodent      | 2nd   | 0                 | 5 (climb)     | 1T   | +0              | +0/+0/+0           | You gain an edge on tests that involve smell.                                                                                                                                                                |
-| Bird        | 3rd   | 0                 | 5 (fly)       | 1T   | +0              | +0/+0/+0           | —                                                                                                                                                                                                            |
+| Bird        | 3rd   | 0                 | 5 (fly)       | 1T   | +0              | +0/+0/+0           |  -                                                                                                                                                                                                             |
 | Great cat   | 3rd   | 5                 | 6 (climb)     | 2    | +0              | +1/+1/+1           | As a maneuver, jump up to 3 squares in any direction. If you land on an enemy of you size or smaller, that enemy is knocked prone and you can make a melee free strike against them as part of the maneuver. |`
 						})
 					]
@@ -960,7 +971,7 @@ You can revert back to your true form as a maneuver. You can’t enter an animal
 								description: 'You grant allies a taste of your unearthly vision.',
 								type: FactoryLogic.type.createManeuver(),
 								keywords: [ AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Void ],
-								distance: [ FactoryLogic.distance.createRanged() ],
+								distance: [ FactoryLogic.distance.createRanged(10) ],
 								target: 'Special',
 								effect: 'For each Victory you have, you can target one creature. That creature gains the benefit of your A Beyonding of Vision feature until the end of your next turn, but doesn’t gain the use of Shared Void Sense.'
 							})
@@ -972,7 +983,7 @@ You can revert back to your true form as a maneuver. You can’t enter an animal
 								description: 'You call on the void to swallow and spit out an ally.',
 								type: FactoryLogic.type.createTrigger('The target starts their turn, moves, or is force moved.'),
 								keywords: [ AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Void ],
-								distance: [ FactoryLogic.distance.createRanged() ],
+								distance: [ FactoryLogic.distance.createRanged(10) ],
 								target: 'Self or 1 ally',
 								effect: 'You teleport the target up to a number of squares equal to your Reason score. If the target moves to trigger this ability, you can teleport them at any point during the move.',
 								spend: [
@@ -995,10 +1006,11 @@ You can revert back to your true form as a maneuver. You can’t enter an animal
 								description: '',
 								type: FactoryLogic.type.createManeuver(),
 								keywords: [ AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Void ],
-								distance: [ FactoryLogic.distance.createRanged() ],
+								distance: [ FactoryLogic.distance.createRanged(10) ],
 								target: 'Special',
 								effect: `
 You open two size 1 portals in unoccupied spaces in range, which last until you move beyond distance from any portal, end the effect as a maneuver, or are dying. Each portal must be placed at a height of no more than 1 square above the ground. When you or any ally touch a portal, that creature can choose to be instantly teleported to an unoccupied space of their choice within 1 square of the other portal. If an enemy is force moved into a portal, their forced movement ends and they emerge from the other portal in an unoccupied space chosen by the creature who force moved them.
+
 At the start of each of your turns while the portals are active, you can open a new portal connected to the others. If three or more portals are present, you and your allies choose which portal you emerge from when you enter a portal, and a creature who force moves an enemy into a portal chooses that enemy’s destination portal.`
 							})
 						})

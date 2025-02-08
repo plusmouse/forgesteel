@@ -1,6 +1,6 @@
+import { DamageModifier, Modifier } from '../models/damage-modifier';
 import { AbilityType } from '../models/ability';
 import { AbilityUsage } from '../enums/ability-usage';
-import { DamageModifier } from '../models/damage-modifier';
 import { MonsterRole } from '../models/monster';
 import { MonsterRoleType } from '../enums/monster-role-type';
 import { Size } from '../models/size';
@@ -34,33 +34,31 @@ export class FormatLogic {
 	};
 
 	static getDamageModifier = (mod: DamageModifier) => {
-		let desc = '';
-		if (mod.value && mod.valuePerLevel && !mod.valuePerEchelon && (mod.value === mod.valuePerLevel)) {
-			desc += `${mod.value >= 0 ? '+' : ''}${mod.value} per level`;
+		return `${mod.damageType} ${mod.type} ${FormatLogic.getModifier(mod)}`;
+	};
+
+	static getModifier = (mod: Modifier) => {
+		const sections: string[] = [];
+		if (mod.value && mod.valuePerLevel && (mod.value === mod.valuePerLevel)) {
+			sections.push(`${mod.value >= 0 ? '+' : ''} ${mod.value} per level`);
 		} else {
 			if (mod.value) {
-				desc += `${mod.value >= 0 ? '+' : ''}${mod.value}`;
-			}
-
-			if (mod.valueCharacteristics.length > 0) {
-				desc += `+${mod.valueCharacteristics.join(' or ')}`;
+				sections.push(`${mod.value >= 0 ? '+' : ''} ${mod.value}`);
 			}
 
 			if (mod.valuePerLevel) {
-				if (desc !== '') {
-					desc += ', ';
-				}
-				desc += `${mod.valuePerLevel >= 0 ? '+' : ''}${mod.valuePerLevel} per level after 1st`;
-			}
-
-			if (mod.valuePerEchelon) {
-				if (desc !== '') {
-					desc += ', ';
-				}
-				desc += `${mod.valuePerEchelon >= 0 ? '+' : ''}${mod.valuePerEchelon} per echelon`;
+				sections.push(`${mod.valuePerLevel >= 0 ? '+' : ''} ${mod.valuePerLevel} per level after 1st`);
 			}
 		}
 
-		return `${mod.damageType} ${mod.type} ${desc}`;
+		if (mod.valuePerEchelon) {
+			sections.push(`${mod.valuePerEchelon >= 0 ? '+' : ''} ${mod.valuePerEchelon} per echelon`);
+		}
+
+		if (mod.valueCharacteristics.length > 0) {
+			sections.push(`+ ${mod.valueCharacteristics.join(' or ')}`);
+		}
+
+		return sections.join(' ') || '+0';
 	};
 }

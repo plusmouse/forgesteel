@@ -61,15 +61,17 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 		FactoryLogic.feature.createMalice({
 			id: 'radenwight-malice-2',
 			name: 'Rat Race',
-			description: 'Each radenwight shifts up to their speed. Wherever a radenwight ends this movement adjacent to at least one other radenwight, they can make a melee free strike against each adjacent enemy.',
-			cost: 5
+			cost: 5,
+			sections: [
+				'Each radenwight shifts up to their speed. Wherever a radenwight ends this movement adjacent to at least one other radenwight, they can make a melee free strike against each adjacent enemy.'
+			]
 		}),
 		FactoryLogic.feature.createMalice({
 			id: 'radenwight-malice-3',
 			name: 'Rally the Rodents',
-			description: 'A radenwight uses music to coordinate rats to form a 10 wall of living rats scurrying atop one another into unoccupied spaces anywhere on the encounter map. The wall doesn’t block line of effect for radenwights and their allies, but it does for other creatures, as the rats coordinate their movements with the radenwights. Each square of the wall has 10 Stamina. If the last radenwight in the encounter dies and the wall is still standing, the rats let out a hideous screech as they disperse. Each enemy on the encounter map makes an Intuition test.',
 			cost: 7,
 			sections: [
+				'A radenwight uses music to coordinate rats to form a 10 wall of living rats scurrying atop one another into unoccupied spaces anywhere on the encounter map. The wall doesn’t block line of effect for radenwights and their allies, but it does for other creatures, as the rats coordinate their movements with the radenwights. Each square of the wall has 10 Stamina. If the last radenwight in the encounter dies and the wall is still standing, the rats let out a hideous screech as they disperse. Each enemy on the encounter map makes an Intuition test.',
 				FactoryLogic.createPowerRoll({
 					characteristic: Characteristic.Intuition,
 					tier1: '7 sonic damage; target can’t take a respite activity during their next respite',
@@ -84,7 +86,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 			id: 'radenwight-1',
 			name: 'Radenwight Mischiever',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Ambusher, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Ambusher),
 			keywords: [ 'Humanoid', 'Radenwight' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -132,7 +134,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 			id: 'radenwight-2',
 			name: 'Radenwight Scrapper',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Defender, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Defender),
 			keywords: [ 'Humanoid', 'Radenwight' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -177,7 +179,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 			id: 'radenwight-3',
 			name: 'Radenwight Swiftpaw',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Harrier, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Harrier),
 			keywords: [ 'Humanoid', 'Radenwight' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -221,7 +223,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 			id: 'radenwight-4',
 			name: 'Radenwight Redeye',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Artillery, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Artillery),
 			keywords: [ 'Humanoid', 'Radenwight' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -238,7 +240,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 						type: FactoryLogic.type.createAction(),
 						cost: 'signature',
 						keywords: [ AbilityKeyword.Ranged, AbilityKeyword.Strike, AbilityKeyword.Weapon ],
-						distance: [ FactoryLogic.distance.createRanged() ],
+						distance: [ FactoryLogic.distance.createRanged(10) ],
 						target: 'One creature or object per minion',
 						powerRoll: FactoryLogic.createPowerRoll({
 							bonus: 2,
@@ -266,7 +268,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 			id: 'radenwight-5',
 			name: 'Radenwight Bruxer',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Brute, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Brute),
 			keywords: [ 'Humanoid', 'Radenwight' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -333,7 +335,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 			id: 'radenwight-6',
 			name: 'Radenwight Piper',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Support, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Support),
 			keywords: [ 'Humanoid', 'Radenwight' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -351,7 +353,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 						keywords: [ AbilityKeyword.Magic, AbilityKeyword.Melee, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
 						distance: [
 							FactoryLogic.distance.createMelee(),
-							FactoryLogic.distance.createRanged()
+							FactoryLogic.distance.createRanged(10)
 						],
 						target: 'One creature or object',
 						powerRoll: FactoryLogic.createPowerRoll({
@@ -398,7 +400,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 			id: 'radenwight-7',
 			name: 'Radenwight Ratcrobat',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Harrier, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Harrier),
 			keywords: [ 'Humanoid', 'Radenwight' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -459,7 +461,7 @@ In truth, The Great Maclette finds beauty in the thrill of the heist. Robbery is
 			name: 'Radenwight Maestro',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.NoRole, MonsterOrganizationType.Leader),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Leader),
 			keywords: [ 'Humanoid', 'Radenwight' ],
 			encounterValue: 12,
 			size: FactoryLogic.createSize(1, 'S'),

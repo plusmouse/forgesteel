@@ -14,7 +14,7 @@ export const kobold: MonsterGroup = {
 		{
 			id: 'kobold-info-1',
 			name: 'Defensive Masters',
-			description:  `
+			description: `
 In a world filled with bigger, hungrier creatures, kobolds survived by becoming experts in collective defense. Kobold shield tactics are legendary; every warrior carries a shield into battle, and soldiers defend each other in tightly choreographed formations. More than a tool, a kobold’s shield is a symbol of their commitment to defending their legion, and they decorate these treasured possessions with battle trophies and illustrations of great deeds.
 
 Kobold legionaries may join worthy adventurers as retainers, lending their defensive prowess to their new allies as they ko-boldly go where no kobold has gone before.`
@@ -27,7 +27,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 		{
 			id: 'kobold-info-3',
 			name: 'Tiny Dragons',
-			description: 'Most kobolds believe their ancestors were created by powerful dragons—and with sharp, angular features and prominent dorsal crests, they certainly look the part! Newborn kobolds have brilliant, pearlescent scales; as kobolds age, their scales dim and mottle. Owing to a deep magical connection, a legion that lives in the domain of a dragon adopts the color of that dragon’s scales over several generations.'
+			description: 'Most kobolds believe their ancestors were created by powerful dragons - and with sharp, angular features and prominent dorsal crests, they certainly look the part! Newborn kobolds have brilliant, pearlescent scales; as kobolds age, their scales dim and mottle. Owing to a deep magical connection, a legion that lives in the domain of a dragon adopts the color of that dragon’s scales over several generations.'
 		},
 		{
 			id: 'kobold-info-4',
@@ -54,20 +54,26 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 		FactoryLogic.feature.createMalice({
 			id: 'kobold-malice-1',
 			name: 'Maniple Tactics',
-			description: 'Up to 3 kobolds make a free strike, swaps positions with an adjacent kobold, and then that kobold makes a free strike.',
-			cost: 3
+			cost: 3,
+			sections: [
+				'Up to 3 kobolds make a free strike, swaps positions with an adjacent kobold, and then that kobold makes a free strike.'
+			]
 		}),
 		FactoryLogic.feature.createMalice({
 			id: 'kobold-malice-2',
 			name: 'Set the Initiative',
-			description: 'Two kobolds take their turns in a row.',
-			cost: 5
+			cost: 5,
+			sections: [
+				'Two kobolds take their turns in a row.'
+			]
 		}),
 		FactoryLogic.feature.createMalice({
 			id: 'kobold-malice-3',
 			name: 'Shield Wall',
-			description: 'Until the end of the round, all kobolds with Shield? Shield! impose an additional bane on incoming strikes and abilities.',
-			cost: 7
+			cost: 7,
+			sections: [
+				'Until the end of the round, all kobolds with Shield? Shield! impose an additional bane on incoming strikes and abilities.'
+			]
 		})
 	],
 	monsters: [
@@ -76,7 +82,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Princeps',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Support, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Support),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -117,7 +123,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Sagittarion',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Artillery, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Artillery),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -158,7 +164,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Tiro',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Defender, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Defender),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -199,7 +205,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Veles',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Harrier, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Harrier),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -243,7 +249,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Adeptus',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Artillery, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Artillery),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -301,7 +307,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Artifax',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Controller, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Controller),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -354,7 +360,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Legionary',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Defender, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Defender),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 9,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -413,7 +419,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Signifier',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Support, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Support),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -473,7 +479,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Venator',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Ambusher, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Ambusher),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -525,7 +531,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Shieldscale Drangolin',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Brute, MonsterOrganizationType.Troop),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Troop, MonsterRoleType.Brute),
 			keywords: [ 'Animal', 'Kobold' ],
 			encounterValue: 12,
 			size: FactoryLogic.createSize(3),
@@ -593,7 +599,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Trained Gelatinous Cube',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Hexer, MonsterOrganizationType.Troop),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Troop, MonsterRoleType.Hexer),
 			keywords: [ 'Animal', 'Kobold' ],
 			encounterValue: 12,
 			size: FactoryLogic.createSize(2),
@@ -646,7 +652,7 @@ Kobold legionaries may join worthy adventurers as retainers, lending their defen
 			name: 'Kobold Centurion',
 			description: '',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.NoRole, MonsterOrganizationType.Leader),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Leader),
 			keywords: [ 'Humanoid', 'Kobold' ],
 			encounterValue: 12,
 			size: FactoryLogic.createSize(1, 'S'),

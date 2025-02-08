@@ -43,12 +43,14 @@ export const AbilityPanel = (props: Props) => {
 		},
 		[ props.cost, props.ability, props.hero ]
 	);
+
 	const headerRibbon = useMemo(
 		() => cost === 'signature'
 			? (<Badge>Signature</Badge>)
 			: cost > 0 ? (<HeroicResourceBadge value={cost} />) : null,
 		[ cost ]
 	);
+
 	const disabled = useMemo(
 		() => (props.options?.dimUnavailableAbilities ?? false)
 			&& props.hero
@@ -59,6 +61,9 @@ export const AbilityPanel = (props: Props) => {
 
 	try {
 		let className = 'ability-panel';
+		if (props.mode !== PanelMode.Full) {
+			className += ' compact';
+		}
 		if (disabled) {
 			className += ' disabled';
 		}
@@ -79,16 +84,14 @@ export const AbilityPanel = (props: Props) => {
 						<div>
 							{
 								props.ability.keywords.length > 0 ?
-									<Field label='Keywords' value={props.ability.keywords.map((k, n) => <Tag key={n}>{k}</Tag>)} />
+									<div>
+										{props.ability.keywords.map((k, n) => <Tag key={n}>{k}</Tag>)}
+									</div>
 									: null
 							}
 							<Field label='Type' value={FormatLogic.getAbilityType(props.ability.type)} />
 							{props.ability.type.trigger ? <Field label='Trigger' value={props.ability.type.trigger} /> : null}
-							{
-								props.ability.distance.length > 0 ?
-									<Field label='Distance' value={props.ability.distance.map(d => AbilityLogic.getDistance(d, props.hero, props.ability)).join(' or ')} />
-									: null
-							}
+							{props.ability.distance.length > 0 ? <Field label='Distance' value={props.ability.distance.map(d => AbilityLogic.getDistance(d, props.hero, props.ability)).join(' or ')} /> : null}
 							{props.ability.target ? <Field label='Target' value={props.ability.target} /> : null}
 							<Markdown text={props.ability.preEffect} />
 							{
@@ -132,7 +135,7 @@ export const AbilityPanel = (props: Props) => {
 										key={n}
 										disabled={props.hero && (props.options?.dimUnavailableAbilities || false) && (spend.value > props.hero.state.heroicResource)}
 										label={(
-											<div style={{ display: 'inline-flex',  alignItems: 'center', gap: '5px' }}>
+											<div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
 												<span>{ spend.name || 'Spend' }</span>
 												{spend.value ? <HeroicResourceBadge value={spend.value} repeatable={spend.repeatable} /> : null}
 											</div>
@@ -146,7 +149,7 @@ export const AbilityPanel = (props: Props) => {
 									<Field
 										key={n}
 										label={(
-											<div style={{ display: 'inline-flex',  alignItems: 'center', gap: '5px' }}>
+											<div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
 												<span>Persist</span>
 												{persist.value ? <HeroicResourceBadge value={persist.value} /> : null}
 											</div>

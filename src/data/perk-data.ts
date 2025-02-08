@@ -104,7 +104,7 @@ export class PerkData {
 			ability: FactoryLogic.createAbility({
 				id: 'perk-friend-catapult-1',
 				name: 'Friend Catapult',
-				description: '',
+				description: 'You hurl your ally through the air.',
 				type: FactoryLogic.type.createManeuver(),
 				keywords: [],
 				distance: [ FactoryLogic.distance.createSelf() ],
@@ -124,7 +124,7 @@ export class PerkData {
 			ability: FactoryLogic.createAbility({
 				id: 'perk-ive-got-you-1',
 				name: 'I\'ve Got You',
-				description: '',
+				description: 'You catch a falling ally at the last possible moment.',
 				type: FactoryLogic.type.createTrigger('A willing ally lands on you when they fall.'),
 				keywords: [],
 				distance: [ FactoryLogic.distance.createSelf() ],
@@ -194,6 +194,7 @@ export class PerkData {
 		name: 'Charming Liar',
 		description: `
 If you fail a test with the Lie skill, you don’t suffer any consequences associated with the failure. You can’t benefit from this perk again until you gain at least 1 Victory.
+
 During a negotiation, you can be caught in one lie without negative consequences. You can’t benefit from this perk again until you gain at least 1 Victory.`,
 		type: FeatureType.Text,
 		data: null,
@@ -241,6 +242,7 @@ During a negotiation, you can be caught in one lie without negative consequences
 		name: 'Harmonizer',
 		description: `
 For you, music is a universal language.
+
 * You can make a Presence test with the music skill to influence creatures even if you don’t share a language.
 * Once during a negotiation when an ally makes an argument, you can play music to give them an edge on their test.`,
 		type: FeatureType.Text,
@@ -338,7 +340,7 @@ For you, music is a universal language.
 			ability: FactoryLogic.createAbility({
 				id: 'perk-gum-up-the-works-1',
 				name: 'Gum Up The Works',
-				description: '',
+				description: 'You prevent a trap from activating.',
 				type: FactoryLogic.type.createTrigger('A mundane trap activates within 3 squares of you.'),
 				keywords: [],
 				distance: [ FactoryLogic.distance.createSelf() ],
@@ -408,9 +410,11 @@ For you, music is a universal language.
 		name: 'I\'ve Read About This Place',
 		description: `
 When you enter a settlement you’ve never been to before, you can ask the Director one of the following questions:
+
 * Who’s the most influential public figure in this settlement?
 * Who in this town would be friendly to us right now?
 * What does this settlement need most from outsiders?
+
 If the Director does not have an answer to the question you ask, you can instead ask a different question.`,
 		type: FeatureType.Text,
 		data: null,
@@ -420,7 +424,7 @@ If the Director does not have an answer to the question you ask, you can instead
 	static linguist: Perk = {
 		id: 'perk-linguist',
 		name: 'Linguist',
-		description: '',
+		description: 'You have an ear for languages.',
 		type: FeatureType.Multiple,
 		data: {
 			features: [
@@ -481,6 +485,7 @@ If the Director does not have an answer to the question you ask, you can instead
 				target: 'Self',
 				effect: `
 Choose one of the following effects:
+
 * You teleport an unattended size 1T or 1S object within 1 square of you to an unoccupied space within 1 square of you.
 * Until the start of your next turn, a part of your body shoots a shower of harmless noisy sparks that give off light within 1 square of you.
 * You ignite or snuff out (your choice) every mundane light source within 1 square of you.
@@ -502,7 +507,7 @@ Choose one of the following effects:
 			ability: FactoryLogic.createAbility({
 				id: 'perk-creature-sense-1',
 				name: 'Creature Sense',
-				description: '',
+				description: 'You intuit a creature\'s keywords.',
 				type: FactoryLogic.type.createManeuver(),
 				keywords: [],
 				distance: [ FactoryLogic.distance.createSelf() ],
@@ -517,7 +522,8 @@ Choose one of the following effects:
 		id: 'perk-familiar',
 		name: 'Familiar',
 		description: `
-A magic spirit, which has taken the form of a specific small animal or animate object, has chosen to be your familiar — or to adopt you as its familiar. The familiar can’t perform activities that require hands, and it can’t harm other creatures or objects. It can provide flanking benefits only to you. The familiar uses the familiar stat block.
+A magic spirit, which has taken the form of a specific small animal or animate object, has chosen to be your familiar - or to adopt you as its familiar. The familiar can’t perform activities that require hands, and it can’t harm other creatures or objects. It can provide flanking benefits only to you. The familiar uses the familiar stat block.
+
 If the familiar is destroyed, you can restore them as a respite activity or by spending a Recovery as an action to bring them back into existence into an unoccupied space adjacent to you.`,
 		type: FeatureType.Text,
 		data: null,
@@ -536,7 +542,7 @@ If the familiar is destroyed, you can restore them as a respite activity or by s
 				description: 'You manipulate a tiny object with your mind.',
 				type: FactoryLogic.type.createManeuver(),
 				keywords: [ AbilityKeyword.Psionic ],
-				distance: [ FactoryLogic.distance.createRanged() ],
+				distance: [ FactoryLogic.distance.createRanged(10) ],
 				target: '1 size 1T unattended object',
 				effect: 'You can grab or manipulate the target with your mind. You can move the object up to a number of squares equal to your Reason, Intuition, or Presence score (your choice). You can use this ability to turn doorknobs, pull levers, and manipulate other smaller, movable pieces of a larger object as long as the piece you\'re manipulating is unattended and size 1T (though you can’t use this ability to break smaller piece off of a larger object).'
 			})
@@ -556,7 +562,7 @@ If the familiar is destroyed, you can restore them as a respite activity or by s
 				description: 'You send a one-way telepathic message to a friend.',
 				type: FactoryLogic.type.createManeuver(),
 				keywords: [ AbilityKeyword.Psionic ],
-				distance: [ FactoryLogic.distance.createRanged() ],
+				distance: [ FactoryLogic.distance.createRanged(10) ],
 				target: '1 ally who understands at least one language',
 				effect: 'You send a telepathic message to the target that takes 10 seconds or less to speak.'
 			})
@@ -569,10 +575,11 @@ If the familiar is destroyed, you can restore them as a respite activity or by s
 		name: 'Thingspeaker',
 		description: `
 When you hold an object in your hand, you can ask the Director if it bears emotional importance. Objects with emotional resonance could include treasured gifts, murder weapons, or personal keepsakes. If the answer is yes, the Director tells you the most dominant emotion associated with the object, and you can spend 1 uninterrupted minute focusing on the object, at the end of which you receive a vision which answers one of the following questions:
+
 * What was the name of the person whose emotions are imprinted on this object?
 * Why does this emotion linger on the object?
-* How long has it been since this was held by the person
-whose emotions linger on it?
+* How long has it been since this was held by the person whose emotions linger on it?
+
 After asking one question, you can choose to delve deeper. You ask one additional question from the list, after which you are overcome with emotions that do not belong to you. You take a bane on Presence and Intuition tests until you finish a respite. While you suffer this bane, you can’t use this feature.`,
 		type: FeatureType.Text,
 		data: null,

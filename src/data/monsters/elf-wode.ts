@@ -9,7 +9,7 @@ import { MonsterRoleType } from '../../enums/monster-role-type';
 
 export const elfWode: MonsterGroup = {
 	id: 'monster-group-elf-wode',
-	name: 'Elves, Wode',
+	name: 'Elf, Wode',
 	description: `
 Children of the Sylvan Celestials, masters of the elf-haunted forests called wodes, these elves see all forests as their domain by birthright. They know and enjoy their reputation among humans as snatching children who wander too far into the woods. Humans should fear the trees.
 
@@ -64,21 +64,25 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 		FactoryLogic.feature.createMalice({
 			id: 'elf-wode-malice-1',
 			name: 'Forest Network',
-			description: 'Each wode elf that ends this turn hidden can shift their speed while remaining hidden.',
-			cost: 3
+			cost: 3,
+			sections: [
+				'Each wode elf that ends this turn hidden can shift their speed while remaining hidden.'
+			]
 		}),
 		FactoryLogic.feature.createMalice({
 			id: 'elf-wode-malice-2',
 			name: 'Punishing Regrowth',
-			description: 'Until the end of the turn, each wode elf inflicts slide 2 with their strikes and they have an edge on their abilities. If a target force moved by one of these strikes ends the forced movement in difficult terrain, they are restrained (EoT).',
-			cost: 5
+			cost: 5,
+			sections: [
+				'Until the end of the turn, each wode elf inflicts slide 2 with their strikes and they have an edge on their abilities. If a target force moved by one of these strikes ends the forced movement in difficult terrain, they are restrained (EoT).'
+			]
 		}),
 		FactoryLogic.feature.createMalice({
 			id: 'elf-wode-malice-3',
 			name: 'Vines Everywhere',
-			description: 'Vines emerge and rapidly grow across the entire encounter map. Each enemy must make an **Agility test**.',
 			cost: 7,
 			sections: [
+				'Vines emerge and rapidly grow across the entire encounter map. Each enemy must make an **Agility test**.',
 				FactoryLogic.createPowerRoll({
 					characteristic: Characteristic.Agility,
 					tier1: '8 damage; restrained (save ends)',
@@ -93,7 +97,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-1',
 			name: 'Wode Elf Lookout',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Support, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Support),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(7),
@@ -135,7 +139,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-2',
 			name: 'Wode Elf Runner',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Harrier, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Harrier),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(7),
@@ -176,7 +180,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-3',
 			name: 'Wode Elf Scout',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Ambusher, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Ambusher),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(10),
@@ -216,7 +220,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-4',
 			name: 'Wode Elf Yeoman',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Artillery, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Artillery),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(7),
@@ -253,7 +257,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-5',
 			name: 'Wode Elf Druid',
 			level: 2,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Controller, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Controller),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 8,
 			speed: FactoryLogic.createSpeed(7),
@@ -302,7 +306,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-6',
 			name: 'Wode Elf Green Seer',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Hexer, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Hexer),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(7),
@@ -367,7 +371,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-7',
 			name: 'Wode Elf Greenskeeper',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Defender, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Defender),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(7),
@@ -418,7 +422,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-8',
 			name: 'Wode Elf Sentry',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Support, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Support),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(7),
@@ -470,7 +474,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-9',
 			name: 'Wode Elf Tree Chirugeon',
 			level: 2,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Harrier, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Harrier),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 8,
 			speed: FactoryLogic.createSpeed(7),
@@ -527,7 +531,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-10',
 			name: 'Wode Elf Tree Guerilla',
 			level: 3,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Ambusher, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Ambusher),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 10,
 			speed: FactoryLogic.createSpeed(7, 'teleport'),
@@ -583,7 +587,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-11',
 			name: 'Wode Elf Tree Gweiadur',
 			level: 3,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Artillery, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Artillery),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 10,
 			speed: FactoryLogic.createSpeed(7),
@@ -641,7 +645,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-12',
 			name: 'Wode Elf Warleader',
 			level: 3,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.NoRole, MonsterOrganizationType.Leader),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Leader),
 			keywords: [ 'Fey', 'Humanoid', 'Wode Elf' ],
 			encounterValue: 20,
 			speed: FactoryLogic.createSpeed(7, 'teleport'),
@@ -754,7 +758,7 @@ The wode elves only send their warleader if the situation is dire. If you fight 
 			id: 'elf-wode-13',
 			name: 'Wodenelg',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Mount, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Mount),
 			keywords: [ 'Plant', 'Wode Elf' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(2),

@@ -1,18 +1,21 @@
 import { Alert, Select, Space } from 'antd';
-import { Feature, FeatureAbilityCostData, FeatureAncestryChoiceData, FeatureAncestryFeatureChoiceData, FeatureBonusData, FeatureChoiceData, FeatureClassAbilityData, FeatureDamageModifierData, FeatureData, FeatureDomainData, FeatureDomainFeatureData, FeatureKitData, FeatureKitTypeData, FeatureLanguageChoiceData, FeatureLanguageData, FeatureMaliceData, FeatureMultipleData, FeaturePerkData, FeatureSizeData, FeatureSkillChoiceData, FeatureSkillData, FeatureSpeedData, FeatureTitleChoiceData } from '../../../../models/feature';
+import { Feature, FeatureAbilityCostData, FeatureAncestryChoiceData, FeatureAncestryFeatureChoiceData, FeatureBonusData, FeatureChoiceData, FeatureClassAbilityData, FeatureDamageModifierData, FeatureData, FeatureDomainData, FeatureDomainFeatureData, FeatureItemChoiceData, FeatureKitData, FeatureKitTypeData, FeatureLanguageChoiceData, FeatureLanguageData, FeatureMaliceData, FeatureMultipleData, FeaturePerkData, FeatureSizeData, FeatureSkillChoiceData, FeatureSkillData, FeatureSpeedData, FeatureTitleChoiceData } from '../../../../models/feature';
 import { Ability } from '../../../../models/ability';
 import { AbilityPanel } from '../ability-panel/ability-panel';
+import { Ancestry } from '../../../../models/ancestry';
 import { AncestryPanel } from '../ancestry-panel/ancestry-panel';
 import { Badge } from '../../../controls/badge/badge';
 import { Collections } from '../../../../utils/collections';
 import { DomainPanel } from '../domain-panel/domain-panel';
 import { FeatureType } from '../../../../enums/feature-type';
 import { Field } from '../../../controls/field/field';
+import { Format } from '../../../../utils/format';
 import { FormatLogic } from '../../../../logic/format-logic';
 import { HeaderText } from '../../../controls/header-text/header-text';
 import { Hero } from '../../../../models/hero';
 import { HeroLogic } from '../../../../logic/hero-logic';
 import { HeroicResourceBadge } from '../../../controls/heroic-resource-badge/heroic-resource-badge';
+import { ItemPanel } from '../item-panel/item-panel';
 import { KitPanel } from '../kit-panel/kit-panel';
 import { Markdown } from '../../../controls/markdown/markdown';
 import { NumberSpin } from '../../../controls/number-spin/number-spin';
@@ -46,7 +49,7 @@ export const FeaturePanel = (props: Props) => {
 		if (sortedAncestries.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
@@ -85,18 +88,31 @@ export const FeaturePanel = (props: Props) => {
 			return null;
 		}
 
-		const features = HeroLogic.getFormerAncestries(props.hero)
+		const currentFeatureIDs = HeroLogic.getFeatures(props.hero)
+			.filter(f => f.id !== props.feature.id)
+			.map(f => f.id);
+
+		const ancestries: Ancestry[] = [];
+		if (data.source.current && props.hero.ancestry) {
+			ancestries.push(props.hero.ancestry);
+		}
+		if (data.source.former) {
+			ancestries.push(...HeroLogic.getFormerAncestries(props.hero));
+		}
+
+		const features = ancestries
 			.flatMap(a => a.features)
 			.filter(f => f.type === FeatureType.Choice)
 			.flatMap(f => f.data.options)
-			.filter(opt => opt.value === data.value)
+			.filter(opt => data.value === opt.value)
+			.filter(opt => opt.feature.type !== FeatureType.AncestryFeatureChoice)
 			.map(opt => opt.feature);
 		const sortedFeatures = Collections.sort(features, f => f.name);
 
 		if (sortedFeatures.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
@@ -110,8 +126,8 @@ export const FeaturePanel = (props: Props) => {
 					className={!data.selected ? 'selection-empty' : ''}
 					allowClear={true}
 					placeholder='Select an ability from an ancestry'
-					options={sortedFeatures.map(a => ({ label: a.name, value: a.id, desc: a.description }))}
-					optionRender={option => <Field label={option.data.label} value={option.data.desc} />}
+					options={sortedFeatures.map(a => ({ label: a.name, value: a.id, desc: a.description, disabled: currentFeatureIDs.includes(a.id) }))}
+					optionRender={option => <Field disabled={option.data.disabled} label={option.data.label} value={option.data.desc} />}
 					value={data.selected ? data.selected.id : null}
 					onChange={value => {
 						const dataCopy = JSON.parse(JSON.stringify(data)) as FeatureAncestryFeatureChoiceData;
@@ -131,28 +147,43 @@ export const FeaturePanel = (props: Props) => {
 	};
 
 	const getEditableChoice = (data: FeatureChoiceData) => {
-		const selectedIDs = data.selected.map(f => f.id);
-
-		const pointsUsed = Collections.sum(selectedIDs, id => {
-			const original = data.options.find(o => o.feature.id === id);
-			return original ? original.value : 0;
-		});
-		const pointsLeft = data.count - pointsUsed;
-
-		const availableOptions = data.options.filter(o => data.options.every(o => o.value === 1) || selectedIDs.includes(o.feature.id) || (o.value <= pointsLeft));
+		let availableOptions = [ ...data.options ];
+		if (availableOptions.some(opt => opt.feature.type === FeatureType.AncestryFeatureChoice)) {
+			availableOptions = availableOptions.filter(opt => opt.feature.type !== FeatureType.AncestryFeatureChoice);
+			const additionalOptions = HeroLogic.getFormerAncestries(props.hero!)
+				.flatMap(a => a.features)
+				.filter(f => f.type === FeatureType.Choice)
+				.flatMap(f => f.data.options)
+				.filter(opt => opt.feature.type !== FeatureType.AncestryFeatureChoice);
+			availableOptions.push(...additionalOptions);
+		}
 		const sortedOptions = Collections.sort(availableOptions, opt => opt.feature.name);
 
 		if (sortedOptions.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
 			);
 		}
 
-		const showCosts = data.options.some(o => o.value > 1);
+		let unavailableIDs: string[] = [];
+		let showCosts = false;
+		if (data.options.some(opt => opt.value > 1)) {
+			const selectedIDs = data.selected.map(f => f.id);
+			const pointsUsed = Collections.sum(selectedIDs, id => {
+				const original = availableOptions.find(o => o.feature.id === id);
+				return original ? original.value : 0;
+			});
+			const pointsLeft = data.count - pointsUsed;
+			unavailableIDs = availableOptions
+				.filter(opt => !selectedIDs.includes(opt.feature.id) && (opt.value > pointsLeft))
+				.map(opt => opt.feature.id);
+
+			showCosts = true;
+		}
 
 		return (
 			<Space direction='vertical' style={{ width: '100%' }}>
@@ -171,11 +202,12 @@ export const FeaturePanel = (props: Props) => {
 					maxCount={data.count === 1 ? undefined : data.count}
 					allowClear={true}
 					placeholder={data.count === 1 ? 'Select an option' : 'Select options'}
-					options={sortedOptions.map(o => ({ label: o.feature.name, value: o.feature.id, desc: o.feature.description, cost: o.value }))}
+					options={sortedOptions.map(o => ({ label: o.feature.name, value: o.feature.id, desc: o.feature.description, disabled: unavailableIDs.includes(o.feature.id), cost: o.value }))}
 					optionRender={option => (
 						<Field
+							disabled={option.data.disabled}
 							label={(
-								<div style={{ display: 'inline-flex',  alignItems: 'center', gap: '5px' }}>
+								<div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
 									<span>{option.data.label}</span>
 									{showCosts ? <HeroicResourceBadge value={option.data.cost} /> : null}
 								</div>
@@ -193,7 +225,7 @@ export const FeaturePanel = (props: Props) => {
 						}
 						const features: Feature[] = [];
 						ids.forEach(id => {
-							const option = data.options.find(o => o.feature.id === id);
+							const option = availableOptions.find(o => o.feature.id === id);
 							if (option) {
 								const featureCopy = JSON.parse(JSON.stringify(option.feature)) as Feature;
 								features.push(featureCopy);
@@ -216,7 +248,18 @@ export const FeaturePanel = (props: Props) => {
 	};
 
 	const getEditableClassAbility = (data: FeatureClassAbilityData) => {
-		const abilities = props.hero?.class?.abilities.filter(a => a.cost === data.cost).filter(a => a.minLevel <= data.minLevel) || [];
+		if (!props.hero) {
+			return null;
+		}
+
+		const currentAbilityIDs = HeroLogic.getFeatures(props.hero)
+			.filter(f => f.id !== props.feature.id)
+			.filter(f => f.type === FeatureType.ClassAbility)
+			.flatMap(f => f.data.selectedIDs);
+
+		const abilities = props.hero?.class?.abilities
+			.filter(a => a.cost === data.cost)
+			.filter(a => a.minLevel <= data.minLevel) || [];
 
 		const distinctAbilities = Collections.distinct(abilities, a => a.name);
 		const sortedAbilities = Collections.sort(distinctAbilities, a => a.name);
@@ -224,7 +267,7 @@ export const FeaturePanel = (props: Props) => {
 		if (sortedAbilities.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
@@ -240,8 +283,8 @@ export const FeaturePanel = (props: Props) => {
 					maxCount={data.count === 1 ? undefined : data.count}
 					allowClear={true}
 					placeholder={data.count === 1 ? 'Select an ability' : 'Select abilities'}
-					options={sortedAbilities.map(a => ({ label: a.name, value: a.id, desc: a.description }))}
-					optionRender={option => <Field label={option.data.label} value={option.data.desc} />}
+					options={sortedAbilities.map(a => ({ label: a.name, value: a.id, desc: a.description, disabled: currentAbilityIDs.includes(a.id) }))}
+					optionRender={option => <Field disabled={option.data.disabled} label={option.data.label} value={option.data.desc} />}
 					value={data.count === 1 ? (data.selectedIDs.length > 0 ? data.selectedIDs[0] : null) : data.selectedIDs}
 					onChange={value => {
 						let ids: string[] = [];
@@ -280,7 +323,7 @@ export const FeaturePanel = (props: Props) => {
 		if (sortedDomains.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
@@ -388,6 +431,63 @@ export const FeaturePanel = (props: Props) => {
 		);
 	};
 
+	const getEditableItemChoice = (data: FeatureItemChoiceData) => {
+		if (!props.hero) {
+			return null;
+		}
+
+		const items = SourcebookLogic.getItems(props.sourcebooks as Sourcebook[])
+			.filter(i => data.types.includes(i.type));
+
+		const sortedItems = Collections.sort(items, i => i.name);
+
+		if (sortedItems.length === 0) {
+			return (
+				<Alert
+					type='warning'
+					showIcon={true}
+					message='There are no options to choose for this feature.'
+				/>
+			);
+		}
+
+		return (
+			<Space direction='vertical' style={{ width: '100%' }}>
+				<Select
+					style={{ width: '100%' }}
+					className={data.selected.length === 0 ? 'selection-empty' : ''}
+					mode={data.count === 1 ? undefined : 'multiple'}
+					maxCount={data.count === 1 ? undefined : data.count}
+					allowClear={true}
+					placeholder={data.count === 1 ? 'Select a kit' : 'Select kits'}
+					options={sortedItems.map(a => ({ label: a.name, value: a.id, desc: a.description }))}
+					optionRender={option => <Field label={option.data.label} value={option.data.desc} />}
+					value={data.count === 1 ? (data.selected.length > 0 ? data.selected[0].id : null) : data.selected.map(i => i.id)}
+					onChange={value => {
+						let ids: string[] = [];
+						if (data.count === 1) {
+							ids = value !== undefined ? [ value as string ] : [];
+						} else {
+							ids = value as string[];
+						}
+						const dataCopy = JSON.parse(JSON.stringify(data)) as FeatureItemChoiceData;
+						dataCopy.selected = [];
+						ids.forEach(id => {
+							const item = items.find(i => i.id === id);
+							if (item) {
+								dataCopy.selected.push(item);
+							}
+						});
+						if (props.setData) {
+							props.setData(props.feature.id, dataCopy);
+						}
+					}}
+				/>
+				{data.selected.map(i => (<ItemPanel key={i.id} item={i} mode={PanelMode.Full} />))}
+			</Space>
+		);
+	};
+
 	const getEditableKit = (data: FeatureKitData) => {
 		if (!props.hero) {
 			return null;
@@ -402,7 +502,7 @@ export const FeaturePanel = (props: Props) => {
 		if (sortedKits.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
@@ -458,12 +558,18 @@ export const FeaturePanel = (props: Props) => {
 			HeroLogic.getFeatures(props.hero)
 				.filter(f => f.id !== props.feature.id)
 				.forEach(f => {
+					const addCurrent = (language: string) => {
+						if (!data.selected.includes(language)) {
+							currentLanguages.push(language);
+						}
+					};
+
 					switch (f.type) {
 						case FeatureType.Language:
-							currentLanguages.push(f.data.language);
+							addCurrent(f.data.language);
 							break;
 						case FeatureType.LanguageChoice:
-							currentLanguages.push(...f.data.selected);
+							currentLanguages.forEach(addCurrent);
 							break;
 					}
 				});
@@ -478,7 +584,7 @@ export const FeaturePanel = (props: Props) => {
 		if (sortedLanguages.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
@@ -533,13 +639,19 @@ export const FeaturePanel = (props: Props) => {
 			return null;
 		}
 
+		const currentPerkIDs = HeroLogic.getFeatures(props.hero)
+			.filter(f => f.id !== props.feature.id)
+			.filter(f => f.type === FeatureType.Perk)
+			.flatMap(f => f.data.selected)
+			.map(p => p.id);
+
 		const perks = SourcebookLogic.getPerks(props.sourcebooks as Sourcebook[]).filter(p => data.lists.includes(p.list));
 		const sortedPerks = Collections.sort(perks, p => p.name);
 
 		if (sortedPerks.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
@@ -555,8 +667,8 @@ export const FeaturePanel = (props: Props) => {
 					maxCount={data.count === 1 ? undefined : data.count}
 					allowClear={true}
 					placeholder={data.count === 1 ? 'Select a perk' : 'Select perks'}
-					options={sortedPerks.map(a => ({ label: a.name, value: a.id, desc: a.description }))}
-					optionRender={option => <Field label={option.data.label} value={option.data.desc} />}
+					options={sortedPerks.map(a => ({ label: a.name, value: a.id, desc: a.description, disabled: currentPerkIDs.includes(a.id) }))}
+					optionRender={option => <Field disabled={option.data.disabled} label={option.data.label} value={option.data.desc} />}
 					value={data.count === 1 ? (data.selected.length > 0 ? data.selected[0].id : null) : data.selected.map(k => k.id)}
 					onChange={value => {
 						let ids: string[] = [];
@@ -591,12 +703,18 @@ export const FeaturePanel = (props: Props) => {
 			HeroLogic.getFeatures(props.hero)
 				.filter(f => f.id !== props.feature.id)
 				.forEach(f => {
+					const addCurrent = (skill: string) => {
+						if (!data.selected.includes(skill)) {
+							currentSkills.push(skill);
+						}
+					};
+
 					switch (f.type) {
 						case FeatureType.Skill:
-							currentSkills.push(f.data.skill);
+							addCurrent(f.data.skill);
 							break;
 						case FeatureType.SkillChoice:
-							currentSkills.push(...f.data.selected);
+							currentSkills.forEach(addCurrent);
 							break;
 					}
 				});
@@ -609,7 +727,7 @@ export const FeaturePanel = (props: Props) => {
 		if (sortedSkills.length === 0) {
 			return (
 				<Alert
-					type='info'
+					type='warning'
 					showIcon={true}
 					message='There are no options to choose for this feature.'
 				/>
@@ -664,6 +782,12 @@ export const FeaturePanel = (props: Props) => {
 			return null;
 		}
 
+		const currentTitleIDs = HeroLogic.getFeatures(props.hero)
+			.filter(f => f.id !== props.feature.id)
+			.filter(f => f.type === FeatureType.TitleChoice)
+			.flatMap(f => f.data.selected)
+			.map(p => p.id);
+
 		const titles = SourcebookLogic.getTitles(props.sourcebooks as Sourcebook[]).filter(t => t.echelon === data.echelon);
 		const sortedTitles = Collections.sort(titles, t => t.name);
 
@@ -692,8 +816,8 @@ export const FeaturePanel = (props: Props) => {
 							maxCount={data.count === 1 ? undefined : data.count}
 							allowClear={true}
 							placeholder={data.count === 1 ? 'Select a title' : 'Select titles'}
-							options={sortedTitles.map(a => ({ label: a.name, value: a.id, desc: a.description }))}
-							optionRender={option => <Field label={option.data.label} value={option.data.desc} />}
+							options={sortedTitles.map(a => ({ label: a.name, value: a.id, desc: a.description, disabled: currentTitleIDs.includes(a.id) }))}
+							optionRender={option => <Field disabled={option.data.disabled} label={option.data.label} value={option.data.desc} />}
 							value={data.count === 1 ? (data.selected.length > 0 ? data.selected[0].id : null) : data.selected.map(k => k.id)}
 							onChange={value => {
 								let ids: string[] = [];
@@ -717,7 +841,7 @@ export const FeaturePanel = (props: Props) => {
 						/>
 						:
 						<Alert
-							type='info'
+							type='warning'
 							showIcon={true}
 							message='There are no options to choose for this feature.'
 						/>
@@ -773,6 +897,8 @@ export const FeaturePanel = (props: Props) => {
 				return getEditableDomain(props.feature.data);
 			case FeatureType.DomainFeature:
 				return getEditableDomainFeature(props.feature.data);
+			case FeatureType.ItemChoice:
+				return getEditableItemChoice(props.feature.data);
 			case FeatureType.Kit:
 				return getEditableKit(props.feature.data);
 			case FeatureType.LanguageChoice:
@@ -808,33 +934,19 @@ export const FeaturePanel = (props: Props) => {
 		);
 	};
 
-	const getExtraBonus = (data: FeatureBonusData) => {
-		let desc = '';
-		if (data.value && data.valuePerLevel && !data.valuePerEchelon && (data.value === data.valuePerLevel)) {
-			desc = `${data.value >= 0 ? '+' : ''}${data.value} per level`;
-		} else {
-			if (data.value) {
-				desc += `${data.value >= 0 ? '+' : ''}${data.value}`;
-			}
-			if (data.valueCharacteristics.length > 0) {
-				desc += `+${data.valueCharacteristics.join(' or ')}`;
-			}
-			if (data.valuePerLevel) {
-				if (desc !== '') {
-					desc += ', ';
-				}
-				desc += `${data.valuePerLevel >= 0 ? '+' : ''}${data.valuePerLevel} per level after 1st`;
-			}
-			if (data.valuePerEchelon) {
-				if (desc !== '') {
-					desc += ', ';
-				}
-				desc += `${data.valuePerEchelon >= 0 ? '+' : ''}${data.valuePerEchelon} per echelon`;
-			}
+	const getExtraAncestryFeatureChoice = (data: FeatureAncestryFeatureChoiceData) => {
+		if (!data.selected) {
+			return (
+				<div className='ds-text'>A {data.value}pt ancestry feature.</div>
+			);
 		}
 
+		return null;
+	};
+
+	const getExtraBonus = (data: FeatureBonusData) => {
 		return (
-			<Field label={data.field} value={desc} />
+			<Field label={data.field} value={FormatLogic.getModifier(data)} />
 		);
 	};
 
@@ -945,6 +1057,36 @@ export const FeaturePanel = (props: Props) => {
 		return null;
 	};
 
+	const getExtraItemChoice = (data: FeatureItemChoiceData) => {
+		if (data.selected.length > 0) {
+			return (
+				<Space direction='vertical' style={{ width: '100%' }}>
+					{
+						data.selected.map(i => <ItemPanel key={i.id} item={i} mode={PanelMode.Full} />)
+					}
+				</Space>
+			);
+		}
+
+		if (!props.feature.description) {
+			let types = data.types.join(', ') || 'item';
+			if (data.count > 1) {
+				types = `${data.count} ${types}s`;
+			} else {
+				if (Format.startsWithVowel(types)) {
+					types = `an ${types}`;
+				} else {
+					types = `a ${types}`;
+				}
+			}
+			return (
+				<div className='ds-text'>Choose {types}.</div>
+			);
+		}
+
+		return null;
+	};
+
 	const getExtraKit = (data: FeatureKitData) => {
 		if (data.selected.length > 0) {
 			return (
@@ -1006,6 +1148,20 @@ export const FeaturePanel = (props: Props) => {
 			<Markdown key={n} text={section} />
 			:
 			<PowerRollPanel key={n} powerRoll={section} test={true} />
+		);
+	};
+
+	const getExtraMultiple = (data: FeatureMultipleData) => {
+		if (data.features.length === 0) {
+			return null;
+		}
+
+		return (
+			<div>
+				<Space direction='vertical' style={{ width: '100%', padding: '0 20px', borderLeft: '5px solid rgb(200 200 200)' }}>
+					{data.features.map(f => <FeaturePanel key={f.id} feature={f} mode={PanelMode.Full} />)}
+				</Space>
+			</div>
 		);
 	};
 
@@ -1124,6 +1280,8 @@ export const FeaturePanel = (props: Props) => {
 				return getExtraAbilityCost(props.feature.data);
 			case FeatureType.AncestryChoice:
 				return getExtraAncestryChoice(props.feature.data);
+			case FeatureType.AncestryFeatureChoice:
+				return getExtraAncestryFeatureChoice(props.feature.data);
 			case FeatureType.Bonus:
 				return getExtraBonus(props.feature.data);
 			case FeatureType.Choice:
@@ -1136,6 +1294,8 @@ export const FeaturePanel = (props: Props) => {
 				return getExtraDomain(props.feature.data);
 			case FeatureType.DomainFeature:
 				return getExtraDomainFeature(props.feature.data);
+			case FeatureType.ItemChoice:
+				return getExtraItemChoice(props.feature.data);
 			case FeatureType.Kit:
 				return getExtraKit(props.feature.data);
 			case FeatureType.KitType:
@@ -1146,6 +1306,8 @@ export const FeaturePanel = (props: Props) => {
 				return getExtraLanguageChoice(props.feature.data);
 			case FeatureType.Malice:
 				return getExtraMalice(props.feature.data);
+			case FeatureType.Multiple:
+				return getExtraMultiple(props.feature.data);
 			case FeatureType.Package:
 				return getExtraPackage();
 			case FeatureType.Perk:
@@ -1188,20 +1350,10 @@ export const FeaturePanel = (props: Props) => {
 			}
 		}
 
-		if (props.feature.type === FeatureType.Multiple) {
-			const data = props.feature.data as FeatureMultipleData;
-			return (
-				<Space direction='vertical' style={{ width: '100%' }}>
-					{tags.length > 0 ? <HeaderText tags={tags}>{props.feature.name || 'Unnamed Perk'}</HeaderText> : null}
-					{data.features.map(f => <FeaturePanel key={f.id} feature={f} hero={props.hero} sourcebooks={props.sourcebooks} mode={PanelMode.Full} />)}
-				</Space>
-			);
-		}
-
 		return (
-			<div className='feature-panel' id={props.mode === PanelMode.Full ? props.feature.id : undefined}>
+			<div className={props.mode === PanelMode.Full ? 'feature-panel' : 'feature-panel compact'} id={props.mode === PanelMode.Full ? props.feature.id : undefined}>
 				<HeaderText ribbon={props.cost === 'signature' ? <Badge>Signature</Badge> : props.cost ? <HeroicResourceBadge value={props.cost} repeatable={props.repeatable} /> : null} tags={tags}>
-					{props.feature.name || 'Unnamed Feature'}
+					{props.feature.name}
 				</HeaderText>
 				<Markdown text={props.feature.description} />
 				{

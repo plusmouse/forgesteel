@@ -7,7 +7,7 @@ import { FactoryLogic } from '../../logic/factory-logic';
 export const timeRaider: Ancestry = {
 	id: 'ancestry-time-raider',
 	name: 'Time Raider',
-	description: 'The original servitor species of the synliiroi — evil psions with near god-like power — the kuran’zoi liberated themselves during the First Psychic War. In the centuries since, they built their own culture and civilization as nomads of the timescape. The exonym “time raiders” was given to them by denizens of the lower worlds who, seeing the advanced technology they wield, concluded they must be from the future.',
+	description: 'The original servitor species of the synliiroi - evil psions with near god-like power - the kuran’zoi liberated themselves during the First Psychic War. In the centuries since, they built their own culture and civilization as nomads of the timescape. The exonym “time raiders” was given to them by denizens of the lower worlds who, seeing the advanced technology they wield, concluded they must be from the future.',
 	features: [
 		FactoryLogic.feature.create({
 			id: 'time-raider-feature-1',
@@ -85,7 +85,7 @@ export const timeRaider: Ancestry = {
 							description: 'You slam an invisible force down upon the target.',
 							type: FactoryLogic.type.createAction(),
 							keywords: [ AbilityKeyword.Psionic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-							distance: [ FactoryLogic.distance.createRanged() ],
+							distance: [ FactoryLogic.distance.createRanged(10) ],
 							target: '1 creature or object',
 							powerRoll: FactoryLogic.createPowerRoll({
 								characteristic: [ Characteristic.Reason, Characteristic.Intuition, Characteristic.Presence ],
@@ -105,7 +105,7 @@ export const timeRaider: Ancestry = {
 							description: 'You shoot forth a beam of psychic purple force that grips your target.',
 							type: FactoryLogic.type.createAction(),
 							keywords: [ AbilityKeyword.Psionic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-							distance: [ FactoryLogic.distance.createRanged() ],
+							distance: [ FactoryLogic.distance.createRanged(10) ],
 							target: '1 creature or object',
 							powerRoll: FactoryLogic.createPowerRoll({
 								characteristic: [ Characteristic.Reason, Characteristic.Intuition, Characteristic.Presence ],

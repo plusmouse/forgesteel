@@ -13,12 +13,12 @@ export const goblin: MonsterGroup = {
 	description: `
 As with all humanoid ancestries, different types of goblins and goblin cultures can be found across many lands, each with their own ideals. Known among themselves as rogabrin, meaning “more of us” in their language, goblins are one of the most numerous humanoids in the world. They can be found in every environment humans occupy and in places many other humanoids avoid, including deep cave systems.
 
-Their long arms and prehensile toes make goblins particularly well adapted to environments requiring climbing, and they live equally comfortably in treetop cities as in subterranean realms filled with stalactites, ledges, and chasms. However, just as many prefer to dwell in tight-knit neighborhoods within diverse cities. Many of those goblins who cross swords with adventuring heroes are the worst of their society—thieves and murderers shunned by their own people.`,
+Their long arms and prehensile toes make goblins particularly well adapted to environments requiring climbing, and they live equally comfortably in treetop cities as in subterranean realms filled with stalactites, ledges, and chasms. However, just as many prefer to dwell in tight-knit neighborhoods within diverse cities. Many of those goblins who cross swords with adventuring heroes are the worst of their society - thieves and murderers shunned by their own people.`,
 	information: [
 		{
 			id: 'goblin-info-1',
 			name: 'Encountered in Groups',
-			description: 'Whether within a society or living in exile, goblins survive and thrive because they work together. A single goblin forced into the wild is terrified. A dozen outlaw goblins are supremely confident—perhaps overly so. Such groups often become bandits who ambush travelers crossing through their territory, be it desert, forest, or underground. Larger bands might become unscrupulous mercenaries serving powerful villains. No matter how they’re encountered, goblins prefer to fight as an overwhelming force and to flee when foes outnumber friends.'
+			description: 'Whether within a society or living in exile, goblins survive and thrive because they work together. A single goblin forced into the wild is terrified. A dozen outlaw goblins are supremely confident - perhaps overly so. Such groups often become bandits who ambush travelers crossing through their territory, be it desert, forest, or underground. Larger bands might become unscrupulous mercenaries serving powerful villains. No matter how they’re encountered, goblins prefer to fight as an overwhelming force and to flee when foes outnumber friends.'
 		},
 		{
 			id: 'goblin-info-2',
@@ -43,7 +43,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 		{
 			id: 'goblin-info-6',
 			name: 'Warg',
-			description: 'Some goblins form a special bond with wargs—canine creatures that many goblin communities raise as mounts, guardians, and companions.'
+			description: 'Some goblins form a special bond with wargs - canine creatures that many goblin communities raise as mounts, guardians, and companions.'
 		},
 		{
 			id: 'goblin-info-7',
@@ -55,21 +55,25 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 		FactoryLogic.feature.createMalice({
 			id: 'goblin-malice-1',
 			name: 'Goblin Mode',
-			description: 'Each goblin in the encounter gains a +2 bonus to speed until the end of the round.',
-			cost: 3
+			cost: 3,
+			sections: [
+				'Each goblin in the encounter gains a +2 bonus to speed until the end of the round.'
+			]
 		}),
 		FactoryLogic.feature.createMalice({
 			id: 'goblin-malice-2',
 			name: 'Tiny Stabs',
-			description: 'Each enemy in the encounter takes 1 damage for each goblin adjacent to them.',
-			cost: 5
+			cost: 5,
+			sections: [
+				'Each enemy in the encounter takes 1 damage for each goblin adjacent to them.'
+			]
 		}),
 		FactoryLogic.feature.createMalice({
 			id: 'goblin-malice-3',
 			name: 'Swamp Stink',
-			description: 'The encounter map becomes covered in a green mist that lasts until the end of the round, and which can’t be dispersed by wind. All areas of the map become difficult terrain for non-goblins, and each non-goblin on the map must make a Might test.',
 			cost: 7,
 			sections: [
+				'The encounter map becomes covered in a green mist that lasts until the end of the round, and which can’t be dispersed by wind. All areas of the map become difficult terrain for non-goblins, and each non-goblin on the map must make a Might test.',
 				FactoryLogic.createPowerRoll({
 					characteristic: Characteristic.Might,
 					tier1: '5 poison damage; weakend until mist disappears',
@@ -84,7 +88,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-1',
 			name: 'Goblin Runner',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Harrier, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Harrier),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -122,7 +126,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-2',
 			name: 'Goblin Sniper',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Artillery, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Artillery),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -161,7 +165,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-3',
 			name: 'Goblin Spineclever',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Brute, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Brute),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -200,7 +204,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-skitterling',
 			name: 'Skitterling',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Hexer, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Hexer),
 			keywords: [ 'Animal', 'Goblin' ],
 			encounterValue: 6,
 			size: FactoryLogic.createSize(1, 'T'),
@@ -234,7 +238,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-5',
 			name: 'Goblin Assassin',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Brute, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Brute),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -294,7 +298,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-6',
 			name: 'Goblin Cursespitter',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Hexer, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Hexer),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -348,7 +352,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-7',
 			name: 'Goblin Stinker',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Controller, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Controller),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -399,7 +403,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-8',
 			name: 'Goblin Underboss',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Support, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Support),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -451,7 +455,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-9',
 			name: 'Goblin Warrior',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Harrier, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Harrier),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -505,7 +509,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-10',
 			name: 'Goblin Monarch',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.NoRole, MonsterOrganizationType.Leader),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Leader),
 			keywords: [ 'Goblin', 'Humanoid' ],
 			encounterValue: 12,
 			size: FactoryLogic.createSize(1, 'S'),
@@ -604,7 +608,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-war-spider',
 			name: 'War Spider',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Mount, MonsterOrganizationType.Troop),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Troop, MonsterRoleType.Mount),
 			keywords: [ 'Animal', 'Goblin' ],
 			encounterValue: 12,
 			size: FactoryLogic.createSize(3),
@@ -704,7 +708,7 @@ Their long arms and prehensile toes make goblins particularly well adapted to en
 			id: 'goblin-warg',
 			name: 'Warg',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Mount, MonsterOrganizationType.Band),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Band, MonsterRoleType.Mount),
 			keywords: [ 'Animal', 'Goblin' ],
 			encounterValue: 3,
 			size: FactoryLogic.createSize(1, 'L'),

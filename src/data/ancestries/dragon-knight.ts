@@ -8,7 +8,7 @@ import { FactoryLogic } from '../../logic/factory-logic';
 export const dragonKnight: Ancestry = {
 	id: 'ancestry-dragon-knight',
 	name: 'Dragon Knight',
-	description: 'The Ritual of Dracogenesis that grants the power to create a generation of dragon knights—also known as draconians or wyrmwights—is obscure and supremely difficult for even an experienced sorcerer to master.',
+	description: 'The Ritual of Dracogenesis that grants the power to create a generation of dragon knights - also known as draconians or wyrmwights - is obscure and supremely difficult for even an experienced sorcerer to master.',
 	features: [
 		FactoryLogic.feature.createChoice({
 			id: 'dragon-knight-feature-1',
@@ -241,16 +241,16 @@ export const dragonKnight: Ancestry = {
 						description: `
 As a maneuver, you can recite the following oath. If you do, you succeed on saving throws when you roll a 4 or higher until the start of your next turn:
 
-Even should the sun stop in the sky
-Even should the night last a thousand years
-I will stand forever
-I shall not yield
-Those who suffer and yearn for justice
-I am your sword and shield
-I will yield no ground
-I will speak no lies
-I will stand against all tyrants
-Until the last villain dies.`
+> Even should the sun stop in the sky
+> Even should the night last a thousand years
+> I will stand forever
+> I shall not yield
+> Those who suffer and yearn for justice
+> I am your sword and shield
+> I will yield no ground
+> I will speak no lies
+> I will stand against all tyrants
+> Until the last villain dies.`
 					}),
 					value: 1
 				},

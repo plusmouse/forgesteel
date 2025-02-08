@@ -1,14 +1,15 @@
+import { DamageModifier, Modifier } from './damage-modifier';
 import { Ability } from './ability';
 import { AbilityKeyword } from '../enums/ability-keyword';
 import { Ancestry } from './ancestry';
-import { Characteristic } from '../enums/characteristic';
-import { DamageModifier } from './damage-modifier';
 import { Domain } from './domain';
 import { Element } from './element';
 import { FeatureField } from '../enums/feature-field';
 import { FeatureType } from '../enums/feature-type';
+import { Item } from './item';
+import { ItemType } from '../enums/item-type';
 import { Kit } from './kit';
-import { KitType } from '../enums/kit';
+import { KitType } from '../enums/kit-type';
 import { Perk } from './perk';
 import { PerkList } from '../enums/perk-list';
 import { PowerRoll } from './power-roll';
@@ -38,17 +39,17 @@ export interface FeatureAncestryChoiceData extends _FeatureData {
 export type FeatureAncestryChoice = FeatureOf<FeatureType.AncestryChoice, FeatureAncestryChoiceData>
 
 export interface FeatureAncestryFeatureChoiceData extends _FeatureData {
+	source: {
+		current: boolean;
+		former: boolean;
+	};
 	value: number;
 	selected: Feature | null;
 };
 export type FeatureAncestryFeatureChoice = FeatureOf<FeatureType.AncestryFeatureChoice, FeatureAncestryFeatureChoiceData>
 
-export interface FeatureBonusData extends _FeatureData {
+export interface FeatureBonusData extends _FeatureData, Modifier {
 	field: FeatureField;
-	value: number;
-	valueCharacteristics: Characteristic[];
-	valuePerLevel: number;
-	valuePerEchelon: number;
 };
 export type FeatureBonus = FeatureOf<FeatureType.Bonus, FeatureBonusData>;
 
@@ -84,6 +85,13 @@ export interface FeatureDomainFeatureData extends _FeatureData {
 	selected: Feature[];
 };
 export type FeatureDomainFeature = FeatureOf<FeatureType.DomainFeature, FeatureDomainFeatureData>;
+
+export interface FeatureItemChoiceData extends _FeatureData {
+	types: ItemType[];
+	count: number;
+	selected: Item[];
+};
+export type FeatureItemChoice = FeatureOf<FeatureType.ItemChoice, FeatureItemChoiceData>;
 
 export interface FeatureKitData extends _FeatureData {
 	types: KitType[];
@@ -175,6 +183,7 @@ export type Feature =
 	| FeatureDamageModifier
 	| FeatureDomain
 	| FeatureDomainFeature
+	| FeatureItemChoice
 	| FeatureKit
 	| FeatureKitType
 	| FeatureLanguage

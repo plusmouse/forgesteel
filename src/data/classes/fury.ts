@@ -4,7 +4,7 @@ import { Characteristic } from '../../enums/characteristic';
 import { FactoryLogic } from '../../logic/factory-logic';
 import { FeatureField } from '../../enums/feature-field';
 import { HeroClass } from '../../models/class';
-import { KitType } from '../../enums/kit';
+import { KitType } from '../../enums/kit-type';
 import { PerkList } from '../../enums/perk-list';
 import { SkillList } from '../../enums/skill-list';
 
@@ -12,8 +12,9 @@ export const fury: HeroClass = {
 	id: 'class-fury',
 	name: 'Fury',
 	description: `
-You do not temper the heat of battle within you — you unleash it! Like a raptor, a panther, a wolf, your experience in the wild taught you the secret of channeling unfettered anger into martial prowess. Primordial chaos is your ally. Leave it to others to use finesse to clean up the pieces you leave behind.
-As a fury, you have abilities that deal a lot of damage, move you around the battlefield, and grow in strength as your rage increases. Nature has no concept of fairness — and neither do you.`,
+You do not temper the heat of battle within you - you unleash it! Like a raptor, a panther, a wolf, your experience in the wild taught you the secret of channeling unfettered anger into martial prowess. Primordial chaos is your ally. Leave it to others to use finesse to clean up the pieces you leave behind.
+
+As a fury, you have abilities that deal a lot of damage, move you around the battlefield, and grow in strength as your rage increases. Nature has no concept of fairness - and neither do you.`,
 	heroicResource: 'Rage',
 	subclassName: 'Primordial Aspect',
 	subclassCount: 1,
@@ -171,7 +172,7 @@ As a fury, you have abilities that deal a lot of damage, move you around the bat
 		FactoryLogic.createAbility({
 			id: 'fury-ability-6',
 			name: 'Out of the Way!',
-			description: 'Your enemies will get out of your way—whether they want to or not.',
+			description: 'Your enemies will get out of your way - whether they want to or not.',
 			type: FactoryLogic.type.createAction(),
 			keywords: [ AbilityKeyword.Melee, AbilityKeyword.Strike, AbilityKeyword.Weapon ],
 			distance: [ FactoryLogic.distance.createMelee() ],
@@ -352,7 +353,9 @@ As a fury, you have abilities that deal a lot of damage, move you around the bat
 							name: 'Primordial Strength',
 							description: `
 Whenever you damage an object with a weapon strike, it takes additional damage equal to your Might score. Additionally, whenever you push another creature into an object, they take additional damage equal to your Might score.
+
 As your rage grows, your primordial strength intensifies. Benefits are cumulative except where an improved benefit replaces a lesser benefit.
+
 * **Rage 2**: Add your Might to the distance you achieve on the Knockback maneuver.
 * **Rage 4**: Gain one surge the first time on a turn that you push a creature.
 * **Rage 6**: Gain an edge on Might tests and the Knockback maneuver.`
@@ -417,6 +420,7 @@ As your rage grows, your primordial strength intensifies. Benefits are cumulativ
 											cost: 5,
 											preEffect: `
 You move up to your speed in a straight line. During this movement, you can move through mundane structures, including walls, which are difficult terrain for you. You automatically destroy each square of structure you move through and leave behind a square of difficult terrain.
+
 Additionally, you make one power roll that targets each enemy you come adjacent to during the move.`,
 											powerRoll: FactoryLogic.createPowerRoll({
 												characteristic: [ Characteristic.Might ],
@@ -470,7 +474,9 @@ Additionally, you make one power roll that targets each enemy you come adjacent 
 							name: 'Primordial Cunning',
 							description: `
 You are never surprised. Additionally, whenever you would push a target with forced movement, you can slide them instead.
+
 As your rage grows, your primordial cunning intensifies. Benefits are cumulative except where an improved benefit replaces a lesser benefit.
+
 * **Rage 2**: Add your Agility to the distance you achieve on the Knockback maneuver.
 * **Rage 4**: Gain one surge the first time on a turn that you slide a creature.
 * **Rage 6**: Gain an edge on Agility tests and the Knockback maneuver.`
@@ -611,6 +617,27 @@ As your rage grows, your primordial cunning intensifies. Benefits are cumulative
 									{
 										value: 1,
 										effect: 'If you are not dying, you can spend a Recovery.'
+									}
+								]
+							})
+						}),
+						FactoryLogic.feature.createAbility({
+							ability: FactoryLogic.createAbility({
+								id: 'fury-sub-3-1-5',
+								name: 'Aspect of the Wild',
+								description: 'You assume the form of the animal who channels your rage.',
+								keywords: [ AbilityKeyword.Magic ],
+								type: FactoryLogic.type.createManeuver(),
+								distance: [ FactoryLogic.distance.createSelf() ],
+								target: 'Self',
+								effect: `
+You can shapeshift into the animal defined by your stormwight kit, a hybrid form, or back into your true form.
+
+While in animal form or hybrid form, you can speak normally and can speak to animals who share your form. If you are in a negotiation with an animal, you treat your Renown as 2 higher than usual while in animal form.`,
+								spend: [
+									{
+										value: 1,
+										effect: 'As a free maneuver on your turn, you can shapeshift a second time, either into another animal form, into your hybrid form, or back into your true form.'
 									}
 								]
 							})

@@ -1,5 +1,5 @@
 import { Ability, AbilityDistance } from '../models/ability';
-import { Feature, FeatureAbilityData, FeatureBonusData, FeatureClassAbilityData, FeatureDamageModifierData, FeatureDomainData, FeatureKitData, FeatureKitTypeData, FeatureLanguageChoiceData, FeatureLanguageData, FeatureSkillChoiceData, FeatureSkillData } from '../models/feature';
+import { Feature, FeatureAbilityData, FeatureBonusData, FeatureClassAbilityData, FeatureDamageModifierData, FeatureDomainData, FeatureItemChoice, FeatureKitData, FeatureKitTypeData, FeatureLanguageChoiceData, FeatureLanguageData, FeatureSkillChoiceData, FeatureSkillData } from '../models/feature';
 import { AbilityDistanceType } from '../enums/abiity-distance-type';
 import { AbilityKeyword } from '../enums/ability-keyword';
 import { Characteristic } from '../enums/characteristic';
@@ -12,7 +12,7 @@ import { FeatureLogic } from './feature-logic';
 import { FeatureType } from '../enums/feature-type';
 import { Hero } from '../models/hero';
 import { Kit } from '../models/kit';
-import { KitType } from '../enums/kit';
+import { KitType } from '../enums/kit-type';
 import { Language } from '../models/language';
 import { Size } from '../models/size';
 import { Skill } from '../models/skill';
@@ -67,29 +67,33 @@ export class HeroLogic {
 		const features: Feature[] = [];
 
 		if (hero.ancestry) {
-			features.push(...FeatureLogic.getFeaturesFromAncestry(hero.ancestry));
+			features.push(...FeatureLogic.getFeaturesFromAncestry(hero.ancestry, hero));
 		}
 
 		if (hero.culture) {
-			features.push(...FeatureLogic.getFeaturesFromCulture(hero.culture));
+			features.push(...FeatureLogic.getFeaturesFromCulture(hero.culture, hero));
 		}
 
 		if (hero.career) {
-			features.push(...FeatureLogic.getFeaturesFromCareer(hero.career));
+			features.push(...FeatureLogic.getFeaturesFromCareer(hero.career, hero));
 		}
 
 		if (hero.class) {
-			features.push(...FeatureLogic.getFeaturesFromClass(hero.class));
+			features.push(...FeatureLogic.getFeaturesFromClass(hero.class, hero));
 		}
 
 		if (hero.complication) {
-			features.push(...FeatureLogic.getFeaturesFromComplication(hero.complication));
+			features.push(...FeatureLogic.getFeaturesFromComplication(hero.complication, hero));
 		}
 
 		features.push(...FeatureLogic.getFeaturesFromCustomization(hero));
 
 		hero.state.inventory.forEach(item => {
-			features.push(...FeatureLogic.getFeaturesFromItem(item, hero));
+			try {
+				features.push(...FeatureLogic.getFeaturesFromItem(item, hero));
+			} catch (ex) {
+				console.error(ex);
+			}
 		});
 
 		return Collections.sort(features, f => f.name);
@@ -303,7 +307,7 @@ If you are dying, you can’t take the Catch Breath maneuver, but other creature
 				target: 'Self',
 				effect: `
 Many tests are maneuvers if made in combat. Searching a chest with a Reason test, picking a door’s lock with an Agility test, or lifting a portcullis with a Might test would all be maneuvers. Assisting a test is also a maneuver in combat.
-Complex or time-consuming tests might require an action if made in combat—or could take so long that they can’t be made during combat at all. Other tests that take no time at all, such as a Reason test to recall lore about mummies, are usually free maneuvers in combat. The Director has the final say regarding which tests can be made as maneuvers.`
+Complex or time-consuming tests might require an action if made in combat - or could take so long that they can’t be made during combat at all. Other tests that take no time at all, such as a Reason test to recall lore about mummies, are usually free maneuvers in combat. The Director has the final say regarding which tests can be made as maneuvers.`
 			}));
 			abilities.push(FactoryLogic.createAbility({
 				id: 'search',
@@ -354,12 +358,9 @@ Complex or time-consuming tests might require an action if made in combat—or c
 				description: '',
 				type: FactoryLogic.type.createAction(),
 				keywords: [],
-				distance: [
-					FactoryLogic.distance.createSelf(),
-					FactoryLogic.distance.createMelee()
-				],
-				target: 'Self or 1 creature',
-				effect: 'You use your action to employ medicine or inspiring words to make an adjacent creature feel better and stay in the fight. The creature can spend a Recovery to regain Stamina, or can make a resistance roll against a “(resistance ends)” effect they are suffering.'
+				distance: [ FactoryLogic.distance.createMelee() ],
+				target: '1 creature',
+				effect: 'You use your action to employ medicine or inspiring words to make an adjacent creature feel better and stay in the fight. The creature can spend a Recovery to regain Stamina, or can make a saving throw against a “(save ends)” effect they are suffering.'
 			}));
 		}
 
@@ -644,6 +645,25 @@ Complex or time-consuming tests might require an action if made in combat—or c
 		return value;
 	};
 
+	static getRenown = (hero: Hero) => {
+		let value = 0;
+
+		this.getFeatures(hero)
+			.filter(f => f.type === FeatureType.Bonus)
+			.map(f => f.data as FeatureBonusData)
+			.filter(data => data.field === FeatureField.Renown)
+			.forEach(data => {
+				value += data.value;
+				value += Collections.max(data.valueCharacteristics.map(ch => HeroLogic.getCharacteristic(hero, ch)), v => v) || 0;
+				if (hero.class) {
+					value += data.valuePerLevel * (hero.class.level - 1);
+					value += data.valuePerEchelon * HeroLogic.getEchelon(hero.class.level);
+				}
+			});
+
+		return value;
+	};
+
 	///////////////////////////////////////////////////////////////////////////
 
 	static getMeleeDamageBonus = (hero: Hero, ability: Ability) => {
@@ -858,6 +878,12 @@ Complex or time-consuming tests might require an action if made in combat—or c
 		if (hero.state.inventory === undefined) {
 			hero.state.inventory = [];
 		}
+
+		if (hero.state.projects === undefined) {
+			hero.state.projects = [];
+		}
+
+		hero.state.inventory = hero.state.inventory.filter(i => (i as unknown as FeatureItemChoice).data === undefined);
 
 		if (hero.abilityCustomizations === undefined) {
 			hero.abilityCustomizations = [];

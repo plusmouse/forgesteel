@@ -1,3 +1,4 @@
+import { PlaybookElementKind } from '../models/playbook';
 import { SourcebookElementKind } from '../models/sourcebook';
 import { useNavigate } from 'react-router';
 
@@ -11,23 +12,35 @@ export const useNavigation = () => {
 		goToHeroList: () => {
 			return navigate('/hero');
 		},
-		goToHeroView: (heroId: string) => {
-			return navigate(`/hero/view/${heroId}`);
+		goToHeroView: (heroID: string) => {
+			return navigate(`/hero/view/${heroID}`);
 		},
-		goToHeroEdit: (heroId: string, tab?: string) => {
-			return navigate(`/hero/edit/${heroId}${tab ? `/${tab}` : ''}`);
+		goToHeroEdit: (heroID: string, tab: string) => {
+			return navigate(`/hero/edit/${heroID}/${tab}`);
 		},
-		goToLibraryList: (tab?: SourcebookElementKind) => {
-			return navigate(`/library${tab ? `/${tab}` : ''}`);
+		goToLibraryList: (kind: SourcebookElementKind) => {
+			return navigate(`/library/${kind}`);
 		},
-		goToLibraryEdit: (sourcebookId: string, kind: SourcebookElementKind, elementId: string) => {
-			return navigate(`/library/edit/${sourcebookId}/${kind}/${elementId}`);
+		goToLibraryView: (kind: SourcebookElementKind, elementID: string, subElementID?: string) => {
+			if (subElementID) {
+				return navigate(`/library/view/${kind}/${elementID}/${subElementID}`);
+			}
+			return navigate(`/library/view/${kind}/${elementID}`);
 		},
-		goToEncounterList: () => {
-			return navigate('/encounter');
+		goToLibraryEdit: (kind: SourcebookElementKind, sourcebookID: string, elementID: string, subElementID?: string) => {
+			if (subElementID) {
+				return navigate(`/library/edit/${kind}/${sourcebookID}/${elementID}/${subElementID}`);
+			}
+			return navigate(`/library/edit/${kind}/${sourcebookID}/${elementID}`);
 		},
-		goToEncounterEdit: (encounterId: string) => {
-			return navigate(`/encounter/edit/${encounterId}`);
+		goToPlaybookList: (kind: PlaybookElementKind) => {
+			return navigate(`/playbook/${kind}`);
+		},
+		goToPlaybookView: (kind: PlaybookElementKind, elementID: string) => {
+			return navigate(`/playbook/view/${kind}/${elementID}`);
+		},
+		goToPlaybookEdit: (kind: PlaybookElementKind, elementID: string) => {
+			return navigate(`/playbook/edit/${kind}/${elementID}`);
 		}
 	};
 };

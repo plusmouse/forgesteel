@@ -1,9 +1,10 @@
 import { Alert, Button, Input, Segmented, Select, Space, Tabs } from 'antd';
 import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
-import { Feature, FeatureAbilityCostData, FeatureAbilityData, FeatureAncestryFeatureChoiceData, FeatureBonusData, FeatureChoiceData, FeatureClassAbilityData, FeatureDamageModifierData, FeatureData, FeatureDomainData, FeatureDomainFeatureData, FeatureKitData, FeatureLanguageChoiceData, FeatureLanguageData, FeatureMaliceData, FeatureMultipleData, FeaturePerkData, FeatureSizeData, FeatureSkillChoiceData, FeatureSkillData, FeatureSpeedData, FeatureTitleChoiceData } from '../../../../models/feature';
+import { Feature, FeatureAbilityCostData, FeatureAbilityData, FeatureAncestryFeatureChoiceData, FeatureBonusData, FeatureChoiceData, FeatureClassAbilityData, FeatureDamageModifierData, FeatureData, FeatureDomainData, FeatureDomainFeatureData, FeatureItemChoiceData, FeatureKitData, FeatureLanguageChoiceData, FeatureLanguageData, FeatureMaliceData, FeatureMultipleData, FeaturePerkData, FeatureSizeData, FeatureSkillChoiceData, FeatureSkillData, FeatureSpeedData, FeatureTitleChoiceData } from '../../../../models/feature';
 import { Ability } from '../../../../models/ability';
 import { AbilityEditPanel } from '../ability-edit-panel/ability-edit-panel';
 import { AbilityKeyword } from '../../../../enums/ability-keyword';
+import { AbilityLogic } from '../../../../logic/ability-logic';
 import { Characteristic } from '../../../../enums/characteristic';
 import { Collections } from '../../../../utils/collections';
 import { DamageModifierType } from '../../../../enums/damage-modifier-type';
@@ -14,8 +15,10 @@ import { FeatureField } from '../../../../enums/feature-field';
 import { FeatureLogic } from '../../../../logic/feature-logic';
 import { FeatureType } from '../../../../enums/feature-type';
 import { Field } from '../../../controls/field/field';
+import { FormatLogic } from '../../../../logic/format-logic';
 import { HeaderText } from '../../../controls/header-text/header-text';
-import { KitType } from '../../../../enums/kit';
+import { ItemType } from '../../../../enums/item-type';
+import { KitType } from '../../../../enums/kit-type';
 import { MultiLine } from '../../../controls/multi-line/multi-line';
 import { NumberSpin } from '../../../controls/number-spin/number-spin';
 import { Perk } from '../../../../models/perk';
@@ -83,6 +86,10 @@ export const FeatureEditPanel = (props: Props) => {
 				break;
 			case FeatureType.AncestryFeatureChoice:
 				data = {
+					source: {
+						current: true,
+						former: true
+					},
 					value: 1,
 					selected: null
 				};
@@ -124,6 +131,13 @@ export const FeatureEditPanel = (props: Props) => {
 			case FeatureType.DomainFeature:
 				data = {
 					level: 1,
+					count: 1,
+					selected: []
+				};
+				break;
+			case FeatureType.ItemChoice:
+				data = {
+					types: [],
 					count: 1,
 					selected: []
 				};
@@ -229,7 +243,7 @@ export const FeatureEditPanel = (props: Props) => {
 
 	const getDataSection = () => {
 		const setCount = (value: number) => {
-			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureChoiceData | FeatureClassAbilityData | FeatureDomainData | FeatureDomainFeatureData | FeatureKitData | FeatureLanguageChoiceData | FeaturePerkData | FeatureSkillChoiceData | FeatureTitleChoiceData;
+			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureChoiceData | FeatureClassAbilityData | FeatureDomainData | FeatureDomainFeatureData | FeatureItemChoiceData | FeatureKitData | FeatureLanguageChoiceData | FeaturePerkData | FeatureSkillChoiceData | FeatureTitleChoiceData;
 			copy.count = value;
 			setData(copy);
 		};
@@ -246,12 +260,6 @@ export const FeatureEditPanel = (props: Props) => {
 			setData(copy);
 		};
 
-		const setValueCharacteristics = (value: Characteristic[]) => {
-			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureBonusData;
-			copy.valueCharacteristics = value;
-			setData(copy);
-		};
-
 		const setValuePerLevel = (value: number) => {
 			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureBonusData;
 			copy.valuePerLevel = value;
@@ -261,6 +269,12 @@ export const FeatureEditPanel = (props: Props) => {
 		const setValuePerEchelon = (value: number) => {
 			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureBonusData;
 			copy.valuePerEchelon = value;
+			setData(copy);
+		};
+
+		const setValueCharacteristics = (value: Characteristic[]) => {
+			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureBonusData;
+			copy.valueCharacteristics = value;
 			setData(copy);
 		};
 
@@ -291,6 +305,12 @@ export const FeatureEditPanel = (props: Props) => {
 		const setField = (value: FeatureField) => {
 			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureBonusData;
 			copy.field = value;
+			setData(copy);
+		};
+
+		const setItemTypes = (value: ItemType[]) => {
+			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureItemChoiceData;
+			copy.types = value;
 			setData(copy);
 		};
 
@@ -351,6 +371,18 @@ export const FeatureEditPanel = (props: Props) => {
 		const setModifier = (value: number) => {
 			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureAbilityCostData;
 			copy.modifier = value;
+			setData(copy);
+		};
+
+		const setSourceCurrent = (value: boolean) => {
+			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureAncestryFeatureChoiceData;
+			copy.source.current = value;
+			setData(copy);
+		};
+
+		const setSourceFormer = (value: boolean) => {
+			const copy = JSON.parse(JSON.stringify(feature.data)) as FeatureAncestryFeatureChoiceData;
+			copy.source.former = value;
 			setData(copy);
 		};
 
@@ -504,7 +536,7 @@ export const FeatureEditPanel = (props: Props) => {
 							placeholder='Select keywords'
 							mode='multiple'
 							allowClear={true}
-							options={[ AbilityKeyword.Animal, AbilityKeyword.Animapathy, AbilityKeyword.Area, AbilityKeyword.Charge, AbilityKeyword.Chronopathy, AbilityKeyword.Cryokinesis, AbilityKeyword.Earth, AbilityKeyword.Fire, AbilityKeyword.Green, AbilityKeyword.Magic, AbilityKeyword.Melee, AbilityKeyword.Metamorphosis, AbilityKeyword.Persistent, AbilityKeyword.Psionic, AbilityKeyword.Pyrokinesis, AbilityKeyword.Ranged, AbilityKeyword.Resistance, AbilityKeyword.Resopathy, AbilityKeyword.Strike, AbilityKeyword.Telekinesis, AbilityKeyword.Telepathy, AbilityKeyword.Void, AbilityKeyword.Weapon ].map(o => ({ value: o }))}
+							options={AbilityLogic.getKeywords().map(o => ({ value: o }))}
 							optionRender={option => <div className='ds-text'>{option.data.value}</div>}
 							value={data.keywords}
 							onChange={setKeywords}
@@ -518,6 +550,9 @@ export const FeatureEditPanel = (props: Props) => {
 				const data = feature.data as FeatureAncestryFeatureChoiceData;
 				return (
 					<Space direction='vertical' style={{ width: '100%' }}>
+						<HeaderText>Source</HeaderText>
+						<Toggle label='Current ancestry' value={data.source.current} onChange={setSourceCurrent} />
+						<Toggle label='Former ancestry' value={data.source.former} onChange={setSourceFormer} />
 						<HeaderText>Value</HeaderText>
 						<NumberSpin value={data.value} onChange={setValue} />
 					</Space>
@@ -538,6 +573,8 @@ export const FeatureEditPanel = (props: Props) => {
 						/>
 						<HeaderText>Value</HeaderText>
 						<NumberSpin label='Value' min={0} value={data.value} onChange={setValue} />
+						<NumberSpin label='Per Level After 1st' min={0} value={data.valuePerLevel} onChange={setValuePerLevel} />
+						<NumberSpin label='Per Echelon' min={0} value={data.valuePerEchelon} onChange={setValuePerEchelon} />
 						<Select
 							style={{ width: '100%' }}
 							placeholder='Characteristics'
@@ -547,8 +584,6 @@ export const FeatureEditPanel = (props: Props) => {
 							value={data.valueCharacteristics}
 							onChange={setValueCharacteristics}
 						/>
-						<NumberSpin label='Per Level After 1st' min={0} value={data.valuePerLevel} onChange={setValuePerLevel} />
-						<NumberSpin label='Per Echelon' min={0} value={data.valuePerEchelon} onChange={setValuePerEchelon} />
 					</Space>
 				);
 			}
@@ -563,9 +598,9 @@ export const FeatureEditPanel = (props: Props) => {
 									key={n}
 									title={option.feature.name || 'Unnamed Feature'}
 									extra={[
-										<Button key='up' type='text' icon={<CaretUpOutlined />} onClick={() => moveChoice(data, n, 'up')} />,
-										<Button key='down' type='text' icon={<CaretDownOutlined />} onClick={() => moveChoice(data, n, 'down')} />,
-										<DangerButton key='delete' mode='icon' onConfirm={() => deleteChoice(data, n)} />
+										<Button key='up' type='text' icon={<CaretUpOutlined />} onClick={e => { e.stopPropagation(); moveChoice(data, n, 'up'); }} />,
+										<Button key='down' type='text' icon={<CaretDownOutlined />} onClick={e => { e.stopPropagation(); moveChoice(data, n, 'down');}} />,
+										<DangerButton key='delete' mode='icon' onConfirm={e => { e.stopPropagation(); deleteChoice(data, n); }} />
 									]}
 								>
 									<Space direction='vertical' style={{ width: '100%' }}>
@@ -622,6 +657,7 @@ export const FeatureEditPanel = (props: Props) => {
 							data.modifiers.map((mod, n) => (
 								<Expander key={n} title='Damage Modifier'>
 									<Space direction='vertical' style={{ width: '100%' }}>
+										<HeaderText>{FormatLogic.getDamageModifier(mod)}</HeaderText>
 										<Input
 											className={mod.damageType === '' ? 'input-empty' : ''}
 											placeholder='Damage type'
@@ -637,7 +673,6 @@ export const FeatureEditPanel = (props: Props) => {
 											value={mod.type}
 											onChange={value => setDamageModifierType(data, n, value)}
 										/>
-										<HeaderText>Value</HeaderText>
 										<NumberSpin label='Value' min={0} value={mod.value} onChange={value => setDamageModifierValue(data, n, value)} />
 										<Select
 											style={{ width: '100%' }}
@@ -650,7 +685,7 @@ export const FeatureEditPanel = (props: Props) => {
 										/>
 										<NumberSpin label='Per Level After 1st' min={0} value={mod.valuePerLevel} onChange={value => setDamageModifierValuePerLevel(data, n, value)} />
 										<NumberSpin label='Per Echelon' min={0} value={mod.valuePerEchelon} onChange={value => setDamageModifierValuePerEchelon(data, n, value)} />
-										<DangerButton onConfirm={() => deleteDamageModifier(data, n)} />
+										<DangerButton block={true} onConfirm={() => deleteDamageModifier(data, n)} />
 									</Space>
 								</Expander>
 							))
@@ -683,6 +718,27 @@ export const FeatureEditPanel = (props: Props) => {
 				const data = feature.data as FeatureDomainData;
 				return (
 					<Space direction='vertical' style={{ width: '100%' }}>
+						<HeaderText>Count</HeaderText>
+						<NumberSpin min={1} value={data.count} onChange={setCount} />
+					</Space>
+				);
+			}
+			case FeatureType.ItemChoice: {
+				const data = feature.data as FeatureItemChoiceData;
+				return (
+					<Space direction='vertical' style={{ width: '100%' }}>
+						<HeaderText>Types</HeaderText>
+						<Select
+							style={{ width: '100%' }}
+							className={data.types.length === 0 ? 'selection-empty' : ''}
+							placeholder='Item types'
+							mode='multiple'
+							allowClear={true}
+							options={[ ItemType.Artifact, ItemType.Consumable, ItemType.Leveled, ItemType.Trinket ].map(option => ({ value: option }))}
+							optionRender={option => <div className='ds-text'>{option.data.value}</div>}
+							value={data.types}
+							onChange={setItemTypes}
+						/>
 						<HeaderText>Count</HeaderText>
 						<NumberSpin min={1} value={data.count} onChange={setCount} />
 					</Space>
@@ -768,9 +824,9 @@ export const FeatureEditPanel = (props: Props) => {
 									key={feature.id}
 									title={feature.name}
 									extra={[
-										<Button key='up' type='text' icon={<CaretUpOutlined />} onClick={() => moveMultipleFeature(data, n, 'up')} />,
-										<Button key='down' type='text' icon={<CaretDownOutlined />} onClick={() => moveMultipleFeature(data, n, 'down')} />,
-										<DangerButton key='delete' mode='icon' onConfirm={() => deleteMultipleFeature(data, n)} />
+										<Button key='up' type='text' icon={<CaretUpOutlined />} onClick={e => { e.stopPropagation(); moveMultipleFeature(data, n, 'up'); }} />,
+										<Button key='down' type='text' icon={<CaretDownOutlined />} onClick={e => { e.stopPropagation(); moveMultipleFeature(data, n, 'down'); }} />,
+										<DangerButton key='delete' mode='icon' onConfirm={e => { e.stopPropagation(); deleteMultipleFeature(data, n); }} />
 									]}
 								>
 									<FeatureEditPanel

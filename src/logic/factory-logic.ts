@@ -1,8 +1,9 @@
 import { Ability, AbilityDistance, AbilityType } from '../models/ability';
 import { Encounter, EncounterGroup, EncounterSlot } from '../models/encounter';
-import { Feature, FeatureAbility, FeatureAbilityCost, FeatureAbilityData, FeatureAncestryChoice, FeatureAncestryFeatureChoice, FeatureBonus, FeatureChoice, FeatureClassAbility, FeatureDamageModifier, FeatureDomain, FeatureDomainFeature, FeatureKit, FeatureKitType, FeatureLanguage, FeatureLanguageChoice, FeatureMalice, FeatureMaliceData, FeatureMultiple, FeaturePackage, FeaturePerk, FeatureSize, FeatureSkill, FeatureSkillChoice, FeatureSpeed, FeatureText, FeatureTitleChoice } from '../models/feature';
+import { Feature, FeatureAbility, FeatureAbilityCost, FeatureAbilityData, FeatureAncestryChoice, FeatureAncestryFeatureChoice, FeatureBonus, FeatureChoice, FeatureClassAbility, FeatureDamageModifier, FeatureDomain, FeatureDomainFeature, FeatureItemChoice, FeatureKit, FeatureKitType, FeatureLanguage, FeatureLanguageChoice, FeatureMalice, FeatureMultiple, FeaturePackage, FeaturePerk, FeatureSize, FeatureSkill, FeatureSkillChoice, FeatureSpeed, FeatureText, FeatureTitleChoice } from '../models/feature';
 import { Kit, KitDamageBonus } from '../models/kit';
 import { Monster, MonsterGroup, MonsterRole } from '../models/monster';
+import { Project, ProjectProgress } from '../models/project';
 import { AbilityDistanceType } from '../enums/abiity-distance-type';
 import { AbilityKeyword } from '../enums/ability-keyword';
 import { AbilityUsage } from '../enums/ability-usage';
@@ -13,7 +14,6 @@ import { Complication } from '../models/complication';
 import { Culture } from '../models/culture';
 import { DamageModifier } from '../models/damage-modifier';
 import { Domain } from '../models/domain';
-import type { Element } from '../models/element';
 import { FeatureField } from '../enums/feature-field';
 import { FeatureType } from '../enums/feature-type';
 import { Format } from '../utils/format';
@@ -22,16 +22,18 @@ import { Hero } from '../models/hero';
 import { HeroClass } from '../models/class';
 import { Item } from '../models/item';
 import { ItemType } from '../enums/item-type';
-import { KitType } from '../enums/kit';
+import { KitArmor } from '../enums/kit-armor';
+import { KitType } from '../enums/kit-type';
+import { KitWeapon } from '../enums/kit-weapon';
 import { MonsterFilter } from '../models/monster-filter';
 import { MonsterLogic } from './monster-logic';
 import { MonsterOrganizationType } from '../enums/monster-organization-type';
 import { MonsterRoleType } from '../enums/monster-role-type';
+import { Negotiation } from '../models/negotiation';
 import { Perk } from '../models/perk';
 import { PerkList } from '../enums/perk-list';
 import { Playbook } from '../models/playbook';
 import { PowerRoll } from '../models/power-roll';
-import { Project } from '../models/project';
 import { Size } from '../models/size';
 import { SkillList } from '../enums/skill-list';
 import { Sourcebook } from '../models/sourcebook';
@@ -69,7 +71,8 @@ export class FactoryLogic {
 				wealth: 1,
 				projectPoints: 0,
 				conditions: [],
-				inventory: []
+				inventory: [],
+				projects: []
 			},
 			abilityCustomizations: []
 		};
@@ -93,13 +96,15 @@ export class FactoryLogic {
 			items: [],
 			monsterGroups: [],
 			skills: [],
-			languages: []
+			languages: [],
+			projects: []
 		};
 	};
 
 	static createPlaybook = (): Playbook => {
 		return {
-			encounters: []
+			encounters: [],
+			negotiations: []
 		};
 	};
 
@@ -239,7 +244,7 @@ export class FactoryLogic {
 		name: string,
 		description: string,
 		type: ItemType,
-		keywords?: AbilityKeyword[],
+		keywords?: (AbilityKeyword | KitArmor | KitWeapon)[],
 		crafting?: Project,
 		effect?: string,
 		featuresByLevel?: { level: number, features: Feature[] }[]
@@ -250,14 +255,7 @@ export class FactoryLogic {
 			description: data.description,
 			type: data.type,
 			keywords: data.keywords || [],
-			crafting: data.crafting || this.createProject({
-				name: 'Crafting',
-				prerequisites: '',
-				source: '',
-				characteristic: [ Characteristic.Reason ],
-				goal: 50,
-				effect: ''
-			}),
+			crafting: data.crafting || null,
 			effect: data.effect || '',
 			featuresByLevel: data.featuresByLevel || [
 				{
@@ -294,8 +292,17 @@ export class FactoryLogic {
 			itemPrerequisites: data.prerequisites || '',
 			source: data.source || '',
 			characteristic: data.characteristic || [ Characteristic.Reason ],
-			goal: data.goal || 50,
-			effect: data.effect || ''
+			goal: data.goal || 0,
+			effect: data.effect || '',
+			progress: null
+		};
+	};
+
+	static createProjectProgress = (): ProjectProgress => {
+		return {
+			prerequisites: false,
+			source: false,
+			points: 0
 		};
 	};
 
@@ -332,7 +339,7 @@ export class FactoryLogic {
 			name: data.name || '',
 			description: data.description || '',
 			level: data.level || 1,
-			role: data.role || FactoryLogic.createMonsterRole(MonsterRoleType.Ambusher, MonsterOrganizationType.Platoon),
+			role: data.role || FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Ambusher),
 			keywords: data.keywords || [],
 			encounterValue: data.encounterValue || 0,
 			size: data.size || FactoryLogic.createSize(1, 'M'),
@@ -346,7 +353,7 @@ export class FactoryLogic {
 		};
 	};
 
-	static createMonsterRole = (type: MonsterRoleType, organization: MonsterOrganizationType): MonsterRole => {
+	static createMonsterRole = (organization: MonsterOrganizationType, type: MonsterRoleType = MonsterRoleType.NoRole): MonsterRole => {
 		return {
 			type: type,
 			organization: organization
@@ -401,6 +408,18 @@ export class FactoryLogic {
 		};
 	};
 
+	static createNegotiation = (): Negotiation => {
+		return {
+			id: Utils.guid(),
+			name: '',
+			description: '',
+			interest: 1,
+			patience: 1,
+			motivations: [],
+			pitfalls: []
+		};
+	};
+
 	static createAbility = (data: {
 		id: string,
 		name: string,
@@ -449,9 +468,7 @@ export class FactoryLogic {
 		tier3: string
 	}): PowerRoll => {
 		return {
-			characteristic: data.characteristic
-				? Array.isArray(data.characteristic) ? data.characteristic : [ data.characteristic ]
-				: [],
+			characteristic: data.characteristic ? Array.isArray(data.characteristic) ? data.characteristic : [ data.characteristic ] : [],
 			bonus: data.bonus ?? 0,
 			tier1: data.tier1,
 			tier2: data.tier2,
@@ -556,7 +573,7 @@ export class FactoryLogic {
 				qualifier: ''
 			};
 		},
-		createRanged: (value = 10): AbilityDistance => {
+		createRanged: (value: number): AbilityDistance => {
 			return {
 				type: AbilityDistanceType.Ranged,
 				value: value,
@@ -622,13 +639,17 @@ export class FactoryLogic {
 				}
 			};
 		},
-		createAncestryFeature: (data: { id: string, name?: string, description?: string, value: number }): FeatureAncestryFeatureChoice => {
+		createAncestryFeature: (data: { id: string, name?: string, description?: string, current: boolean, former: boolean, value: number }): FeatureAncestryFeatureChoice => {
 			return {
 				id: data.id,
 				name: data.name || 'Ancestry Feature',
 				description: data.description || '',
 				type: FeatureType.AncestryFeatureChoice,
 				data: {
+					source: {
+						current: data.current,
+						former: data.former
+					},
 					value: data.value,
 					selected: null
 				}
@@ -654,7 +675,7 @@ export class FactoryLogic {
 			return {
 				id: data.id,
 				name: data.name || 'Choice',
-				description: data.description || (count > 1 ? `Choose ${count} options.` : 'Choose an option.'),
+				description: data.description || '',
 				type: FeatureType.Choice,
 				data: {
 					options: data.options,
@@ -668,7 +689,7 @@ export class FactoryLogic {
 			return {
 				id: data.id,
 				name: data.name || 'Ability',
-				description: data.description || `Choose ${count > 1 ? count : 'a'} ${(data.cost === 0) || (data.cost === 'signature') ? 'signature' : `${data.cost}pt`} ${count > 1 ? 'abilities' : 'ability'}.`,
+				description: data.description || '',
 				type: FeatureType.ClassAbility,
 				data: {
 					cost: data.cost,
@@ -694,7 +715,7 @@ export class FactoryLogic {
 			return {
 				id: data.id,
 				name: data.name || 'Domain',
-				description: data.description || (count > 1 ? `Choose ${count} domains.` : 'Choose a domain.'),
+				description: data.description || '',
 				type: FeatureType.Domain,
 				data: {
 					count: count,
@@ -707,10 +728,25 @@ export class FactoryLogic {
 			return {
 				id: data.id,
 				name: data.name || 'Domain Feature Choice',
-				description: data.description || (count > 1 ? `Choose ${count} options.` : 'Choose an option.'),
+				description: data.description || '',
 				type: FeatureType.DomainFeature,
 				data: {
 					level: data.level,
+					count: count,
+					selected: []
+				}
+			};
+		},
+		createItemChoice: (data: { id: string, name?: string, description?: string, types?: ItemType[], count?: number }): FeatureItemChoice => {
+			const count = data.count || 1;
+			const type = data.types && (data.types.length === 1) ? data.types[0] : 'Item';
+			return {
+				id: data.id,
+				name: data.name || type,
+				description: data.description || '',
+				type: FeatureType.ItemChoice,
+				data: {
+					types: data.types || [ ItemType.Artifact, ItemType.Consumable, ItemType.Leveled, ItemType.Trinket ],
 					count: count,
 					selected: []
 				}
@@ -721,7 +757,7 @@ export class FactoryLogic {
 			return {
 				id: data.id,
 				name: data.name || 'Kit',
-				description: data.description || (count > 1 ? `Choose ${count} kits.` : 'Choose a kit.'),
+				description: data.description || '',
 				type: FeatureType.Kit,
 				data: {
 					types: data.types || [],
@@ -734,7 +770,7 @@ export class FactoryLogic {
 			return {
 				id: data.id,
 				name: data.name || 'Kit Type',
-				description: data.description || `Allow ${data.types.join(', ')} kits.`,
+				description: data.description || '',
 				type: FeatureType.KitType,
 				data: {
 					types: data.types || []
@@ -766,15 +802,15 @@ export class FactoryLogic {
 				}
 			};
 		},
-		createMalice: (data: Element & FeatureMaliceData): FeatureMalice => {
+		createMalice: (data: { id: string, name: string, cost: number, repeatable?: boolean, sections: (string | PowerRoll)[] }): FeatureMalice => {
 			return {
 				id: data.id,
 				name: data.name,
-				description: data.description,
+				description: '',
 				type: FeatureType.Malice,
 				data: {
 					cost: data.cost,
-					repeatable: data.repeatable,
+					repeatable: data.repeatable || false,
 					sections: data.sections
 				}
 			};
@@ -862,19 +898,19 @@ export class FactoryLogic {
 				}
 			};
 		},
-		createSoloMonster: ({ id, monsterName, gender }: { id: string, monsterName: string, gender?: 'masc' | 'femme' | 'non-binary' }): FeatureText => {
-			const capitalizedName = monsterName.split(' ').map((n, i) => i === 0 ? Format.capitalize(n) : n).join(' ');
-			const genderWithDefault = gender ?? 'non-binary';
-			const heSheThey = ({ masc: 'he', femme: 'she', 'non-binary': 'they' } as const)[genderWithDefault];
-			const hisHerTheir = ({ masc: 'his', femme: 'her', 'non-binary': 'their' } as const)[genderWithDefault];
-			const himHerThem = ({ masc: 'him', femme: 'her', 'non-binary': 'them' } as const)[genderWithDefault];
+		createSoloMonster: (data: { id: string, name: string, gender?: 'm' | 'f' | 'n' , endEfect?: number }): FeatureText => {
+			const capitalizedName = data.name.split(' ').map((n, i) => i === 0 ? Format.capitalize(n) : n).join(' ');
+			const genderWithDefault = data.gender ?? 'n';
+			const heSheThey = ({ m: 'he', f: 'she', n: 'they' } as const)[ genderWithDefault ];
+			const hisHerTheir = ({ m: 'his', f: 'her', n: 'their' } as const)[ genderWithDefault ];
+			const himHerThem = ({ m: 'him', f: 'her', n: 'them' } as const)[ genderWithDefault ];
 			return {
-				id,
+				id: data.id,
 				name: 'Solo Monster',
 				description: `
-**Solo Turns** ${capitalizedName} takes up to two turns each round. ${Format.capitalize(heSheThey)} can’t take turns consecutively. ${Format.capitalize(heSheThey)} can use two actions on each of ${hisHerTheir} turns. While dazed, ${monsterName} can take one action and one maneuver per turn.
+**Solo Turns** ${capitalizedName} takes up to two turns each round. ${Format.capitalize(heSheThey)} can’t take turns consecutively. ${Format.capitalize(heSheThey)} can use two actions on each of ${hisHerTheir} turns. While dazed, ${data.name} can take one action and one maneuver per turn.
 
-**End Effect** At the end of ${hisHerTheir} turn, ${monsterName} can take 10 damage to end one save ends effect affecting ${himHerThem}. This damage can’t be reduced in any way.`,
+**End Effect** At the end of ${hisHerTheir} turn, ${data.name} can take ${data.endEfect || 5} damage to end one save ends effect affecting ${himHerThem}. This damage can’t be reduced in any way.`,
 				type: FeatureType.Text,
 				data: null
 			};

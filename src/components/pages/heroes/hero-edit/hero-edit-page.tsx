@@ -59,18 +59,19 @@ const matchElement = (element: Element, searchTerm: string) => {
 interface Props {
 	heroes: Hero[];
 	sourcebooks: Sourcebook[];
+	showDirectory: () => void;
 	showAbout: () => void;
 	saveChanges: (hero: Hero) => void;
 }
 
 export const HeroEditPage = (props: Props) => {
 	const navigation = useNavigation();
-	const { heroId, tab } = useParams<{ heroId: string; tab: HeroTab }>();
+	const { heroID, tab } = useParams<{ heroID: string; tab: HeroTab }>();
 	const setTabKey = (tabKey: HeroTab) => {
-		navigation.goToHeroEdit(heroId!, tabKey);
+		navigation.goToHeroEdit(heroID!, tabKey);
 	};
 	const [ page, setPage ] = [ tab, setTabKey ];
-	const originalHero = useMemo(() => props.heroes.find(h => h.id === heroId)!, [ heroId, props.heroes ]);
+	const originalHero = useMemo(() => props.heroes.find(h => h.id === heroID)!, [ heroID, props.heroes ]);
 	const [ hero, setHero ] = useState<Hero>(JSON.parse(JSON.stringify(originalHero)) as Hero);
 	const [ dirty, setDirty ] = useState<boolean>(false);
 	const [ searchTerm, setSearchTerm ] = useState<string>('');
@@ -301,6 +302,16 @@ export const HeroEditPage = (props: Props) => {
 			setDirty(true);
 		};
 
+		const setFeature = (featureID: string, feature: Feature) => {
+			const heroCopy = JSON.parse(JSON.stringify(hero)) as Hero;
+			const index = heroCopy.features.findIndex(f => f.id === featureID);
+			if (index !== -1) {
+				heroCopy.features[index] = feature;
+			}
+			setHero(heroCopy);
+			setDirty(true);
+		};
+
 		const setFeatureData = (featureID: string, data: FeatureData) => {
 			const heroCopy = JSON.parse(JSON.stringify(hero)) as Hero;
 			const feature = HeroLogic.getFeatures(heroCopy).find(f => f.id === featureID);
@@ -434,6 +445,7 @@ export const HeroEditPage = (props: Props) => {
 							setSettingIDs={setSettingIDs}
 							addFeature={addFeature}
 							deleteFeature={deleteFeature}
+							setFeature={setFeature}
 							setFeatureData={setFeatureData}
 						/>
 					);
@@ -461,11 +473,11 @@ export const HeroEditPage = (props: Props) => {
 
 		return (
 			<div className='hero-edit-page'>
-				<AppHeader breadcrumbs={[ { label: 'Hero Builder' } ]} showAbout={props.showAbout}>
+				<AppHeader breadcrumbs={[ { label: 'Hero Builder' } ]} showDirectory={props.showDirectory} showAbout={props.showAbout}>
 					<Button type='primary' disabled={!dirty} onClick={saveChanges}>
 						Save Changes
 					</Button>
-					<Button onClick={() => navigation.goToHeroView(heroId!)}>
+					<Button onClick={() => navigation.goToHeroView(heroID!)}>
 						Cancel
 					</Button>
 				</AppHeader>
@@ -536,7 +548,7 @@ const AncestrySection = (props: AncestrySectionProps) => {
 
 		let choices: ReactNode[] = [];
 		if (props.hero.ancestry) {
-			choices = FeatureLogic.getFeaturesFromAncestry(props.hero.ancestry)
+			choices = FeatureLogic.getFeaturesFromAncestry(props.hero.ancestry, props.hero)
 				.filter(f => FeatureLogic.isChoice(f))
 				.map(f => (
 					<SelectablePanel key={f.id}>
@@ -609,7 +621,7 @@ const CultureSection = (props: CultureSectionProps) => {
 
 		let choices: ReactNode[] = [];
 		if (props.hero.culture) {
-			choices = FeatureLogic.getFeaturesFromCulture(props.hero.culture)
+			choices = FeatureLogic.getFeaturesFromCulture(props.hero.culture, props.hero)
 				.filter(f => FeatureLogic.isChoice(f))
 				.map(f => (
 					<SelectablePanel key={f.id}>
@@ -737,7 +749,7 @@ const CareerSection = (props: CareerSectionProps) => {
 
 		let choices: ReactNode[] = [];
 		if (props.hero.career) {
-			choices = FeatureLogic.getFeaturesFromCareer(props.hero.career)
+			choices = FeatureLogic.getFeaturesFromCareer(props.hero.career, props.hero)
 				.filter(f => FeatureLogic.isChoice(f))
 				.map(f => (
 					<SelectablePanel key={f.id}>
@@ -839,7 +851,7 @@ const ClassSection = (props: ClassSectionProps) => {
 
 		let choices: ReactNode[] = [];
 		if (props.hero.class) {
-			choices = FeatureLogic.getFeaturesFromClass(props.hero.class)
+			choices = FeatureLogic.getFeaturesFromClass(props.hero.class, props.hero)
 				.filter(f => FeatureLogic.isChoice(f))
 				.map(f => (
 					<SelectablePanel key={f.id}>
@@ -1006,7 +1018,7 @@ const ComplicationSection = (props: ComplicationSectionProps) => {
 
 		let choices: ReactNode[] = [];
 		if (props.hero.complication) {
-			choices = FeatureLogic.getFeaturesFromComplication(props.hero.complication)
+			choices = FeatureLogic.getFeaturesFromComplication(props.hero.complication, props.hero)
 				.filter(f => FeatureLogic.isChoice(f))
 				.map(f => (
 					<SelectablePanel key={f.id}>
@@ -1064,6 +1076,7 @@ interface DetailsSectionProps {
 	setSettingIDs: (settingIDs: string[]) => void;
 	addFeature: (feature: Feature) => void;
 	deleteFeature: (feature: Feature) => void;
+	setFeature: (featureID: string, feature: Feature) => void;
 	setFeatureData: (featureID: string, data: FeatureData) => void;
 }
 
@@ -1110,6 +1123,7 @@ const DetailsSection = (props: DetailsSectionProps) => {
 						hero={props.hero}
 						sourcebooks={props.sourcebooks}
 						addFeature={props.addFeature}
+						setFeature={props.setFeature}
 						setFeatureData={props.setFeatureData}
 						deleteFeature={props.deleteFeature}
 					/>

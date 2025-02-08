@@ -4,7 +4,7 @@ import { FactoryLogic } from '../../logic/factory-logic';
 export const hakaan: Ancestry = {
 	id: 'ancestry-hakaan',
 	name: 'Hakaan',
-	description: 'In spite of their friendly, outgoing nature, the rare presence of a hakaan in human society is considered a harbinger—an omen of dark times. Descended from a tribe of giants in upper Vanigar, the original Haka’an tribe made a bargain with Holkatja the Vanigar trickster god. They traded some of their gigantic size and strength for the ability to see the future.',
+	description: 'In spite of their friendly, outgoing nature, the rare presence of a hakaan in human society is considered a harbinger - an omen of dark times. Descended from a tribe of giants in upper Vanigar, the original Haka’an tribe made a bargain with Holkatja the Vanigar trickster god. They traded some of their gigantic size and strength for the ability to see the future.',
 	features: [
 		FactoryLogic.feature.createSize({
 			id: 'hakaan-feature-1',
@@ -54,7 +54,9 @@ export const hakaan: Ancestry = {
 						name: 'Doomsight',
 						description: `
 Working with your Director, you can predetermine an encounter in which you will die. When that encounter begins, you become doomed. While doomed, you automatically get tier 3 results on tests and ability power rolls, and you don’t die no matter how low your Stamina falls. You then die immediately at the end of the encounter.
+
 If you don’t predetermine your death encounter, you can choose to become doomed while you are dying with the director’s approval (no action required). Doing so should be reserved for encounters in which you are dying as a result of suitable heroism, such as making a last stand against a boss or saving civilians, or when the consequences of your actions have finally caught up to you.
+
 Additionally, when your Stamina equals the negative of your winded value and you are not doomed, you turn to rubble instead of experiencing death. You are unaware of your surroundings in this state. After 12 hours, you regain Stamina equal to your Recovery value.`
 					}),
 					value: 2

@@ -7,7 +7,7 @@ import { FactoryLogic } from '../../logic/factory-logic';
 export const revenant: Ancestry = {
 	id: 'ancestry-revenant',
 	name: 'Revenant',
-	description: 'Unlike the necromantic rituals that produce wights and wraiths and zombies, revenants rise from the grave through a combination of an unjust death and a burning desire for vengeance. Creatures sustained on pure will, they have no need of food or water or air—and, unlike their zombified cousins, they retain all their memories and personality from life.',
+	description: 'Unlike the necromantic rituals that produce wights and wraiths and zombies, revenants rise from the grave through a combination of an unjust death and a burning desire for vengeance. Creatures sustained on pure will, they have no need of food or water or air - and, unlike their zombified cousins, they retain all their memories and personality from life.',
 	features: [
 		FactoryLogic.feature.createAncestry({
 			id: 'revenant-feature-1',
@@ -71,6 +71,8 @@ export const revenant: Ancestry = {
 				{
 					feature: FactoryLogic.feature.createAncestryFeature({
 						id: 'revenant-feature-4-1',
+						current: false,
+						former: true,
 						value: 1
 					}),
 					value: 1
@@ -94,6 +96,8 @@ export const revenant: Ancestry = {
 				{
 					feature: FactoryLogic.feature.createAncestryFeature({
 						id: 'revenant-feature-4-4',
+						current: false,
+						former: true,
 						value: 2
 					}),
 					value: 2
@@ -108,7 +112,9 @@ export const revenant: Ancestry = {
 								name: 'Vengeance Mark',
 								description: `
 As a maneuver, you place a magic sigil on a creature within 10 squares of you. When you place a sigil, you can decide where it appears on the creature’s body, and whether the sigil is visible to only you or to all creatures.
+
 You always know the direction to the exact location of a creature who bears one of your sigils and is on the same world as you.
+
 You can have an active number of sigils equal to your level. You can remove a sigil from a creature harmlessly (no action required). If you are already using your maximum number of sigils and place a new one, your oldest sigil disappears with no other effect.`
 							}),
 							FactoryLogic.feature.createAbility({
@@ -118,7 +124,7 @@ You can have an active number of sigils equal to your level. You can remove a si
 									description: 'A magical sigil you placed on a creature explodes with energy.',
 									type: FactoryLogic.type.createAction(),
 									keywords: [ AbilityKeyword.Magic, AbilityKeyword.Ranged, AbilityKeyword.Strike ],
-									distance: [ FactoryLogic.distance.createRanged() ],
+									distance: [ FactoryLogic.distance.createRanged(10) ],
 									target: '1 creature with your sigil',
 									powerRoll: FactoryLogic.createPowerRoll({
 										characteristic: [ Characteristic.Reason, Characteristic.Intuition, Characteristic.Presence ],

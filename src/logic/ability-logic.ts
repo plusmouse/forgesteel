@@ -1,12 +1,68 @@
 import { Ability, AbilityDistance } from '../models/ability';
 import { AbilityDistanceType } from '../enums/abiity-distance-type';
+import { AbilityKeyword } from '../enums/ability-keyword';
 import { Characteristic } from '../enums/characteristic';
 import { Collections } from '../utils/collections';
 import { Hero } from '../models/hero';
 import { HeroLogic } from './hero-logic';
+import { KitArmor } from '../enums/kit-armor';
+import { KitWeapon } from '../enums/kit-weapon';
 import { PowerRoll } from '../models/power-roll';
 
 export class AbilityLogic {
+	static getKeywords = () => {
+		return [
+			AbilityKeyword.Animal,
+			AbilityKeyword.Animapathy,
+			AbilityKeyword.Area,
+			AbilityKeyword.Arms,
+			AbilityKeyword.Charge,
+			AbilityKeyword.Chronopathy,
+			AbilityKeyword.Cryokinesis,
+			AbilityKeyword.Earth,
+			AbilityKeyword.Feet,
+			AbilityKeyword.Fire,
+			AbilityKeyword.Green,
+			AbilityKeyword.Hands,
+			AbilityKeyword.Head,
+			AbilityKeyword.Implement,
+			AbilityKeyword.Magic,
+			AbilityKeyword.Melee,
+			AbilityKeyword.Metamorphosis,
+			AbilityKeyword.Neck,
+			AbilityKeyword.Oil,
+			AbilityKeyword.Orb,
+			AbilityKeyword.Persistent,
+			AbilityKeyword.Potion,
+			AbilityKeyword.Psionic,
+			AbilityKeyword.Pyrokinesis,
+			AbilityKeyword.Ranged,
+			AbilityKeyword.Resistance,
+			AbilityKeyword.Resopathy,
+			AbilityKeyword.Ring,
+			AbilityKeyword.Rot,
+			AbilityKeyword.Routine,
+			AbilityKeyword.Strike,
+			AbilityKeyword.Telekinesis,
+			AbilityKeyword.Telepathy,
+			AbilityKeyword.Void,
+			AbilityKeyword.Wand,
+			AbilityKeyword.Weapon,
+			KitArmor.Heavy,
+			KitArmor.Light,
+			KitArmor.Medium,
+			KitArmor.Shield,
+			KitWeapon.Bow,
+			KitWeapon.Ensnaring,
+			KitWeapon.Heavy,
+			KitWeapon.Light,
+			KitWeapon.Medium,
+			KitWeapon.Polearm,
+			KitWeapon.Unarmed,
+			KitWeapon.Whip
+		].sort();
+	};
+
 	static getDistance = (distance: AbilityDistance, hero?: Hero, ability?: Ability) => {
 		if (distance.type === AbilityDistanceType.Self) {
 			return 'Self';
@@ -41,7 +97,7 @@ export class AbilityLogic {
 		const persistLength = Collections.sum(ability.persistence, e => Math.round(e.effect.split(' ').length / 10));
 
 		const length = descLength + preEffectLength + powerRollLength + effectLength + alternateLength + spendLength + persistLength;
-		return Math.max(1, Math.round(length / 20));
+		return Math.max(1, Math.round(length / 12));
 	};
 
 	static usesPotency = (powerRoll: PowerRoll) => {
@@ -59,8 +115,8 @@ export class AbilityLogic {
 		return value
 			.split(';')
 			.map(section => section.trim())
-			.map(section => {
-				if (section.toLowerCase().includes('damage') || section.toLowerCase().includes('dmg')){
+			.map((section, n) => {
+				if ((n === 0) && section.toLowerCase().endsWith('damage') || section.toLowerCase().endsWith('dmg')){
 					// Modify section to calculate characteristic bonuses
 					let value = 0;
 					let sign = '+';

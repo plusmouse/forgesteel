@@ -11,7 +11,7 @@ export const dwarf: MonsterGroup = {
 	id: 'monster-group-dwarf',
 	name: 'Dwarf',
 	description: `
-Possessed of a strength that belies their size, dwarven flesh is infused with stone—a silico-organic hybrid making them physically denser than humans or elves. They enjoy a reputation in Orden as savvy engineers and technologists thanks to the lore they inherited from their elder siblings, the long-extinct steel dwarves.
+Possessed of a strength that belies their size, dwarven flesh is infused with stone - a silico-organic hybrid making them physically denser than humans or elves. They enjoy a reputation in Orden as savvy engineers and technologists thanks to the lore they inherited from their elder siblings, the long-extinct steel dwarves.
 
 They are the children of the elder god Ord. A common phrase among the dwarves is “Ord made the world.” Their way of saying, “What will be, will be.” Dwarves take great pride in knowing that along with Aan, Eth, and Kul, their god created the mundane world, and many dwarves leave their homes to see the world and seek glory in Ord’s name.`,
 	information: [
@@ -21,7 +21,7 @@ They are the children of the elder god Ord. A common phrase among the dwarves is
 			description: `
 Those raised within dwarven enclaves have a relationship with technology not found in many other places on Orden. The gifts of the Steel Dwarves are many in number, but the most prominent is that of pneumatic steam power.
 
-Dwarves have incorporated steam into much of their warfare and weaponry, making them deadly opponents. But like all technology, it's a double headed hammer.  As much as they use it for destruction, construction is where they truly shine. Creating the formidable and brutalist facades common dwarven architecture is made much easier with the use of tools created to utilize pneumatic power. Some of the larger and more metropolitan dwarven cities are rumored to power wealthier districts using steam from geothermal vents.`
+Dwarves have incorporated steam into much of their warfare and weaponry, making them deadly opponents. But like all technology, it's a double headed hammer. As much as they use it for destruction, construction is where they truly shine. Creating the formidable and brutalist facades common dwarven architecture is made much easier with the use of tools created to utilize pneumatic power. Some of the larger and more metropolitan dwarven cities are rumored to power wealthier districts using steam from geothermal vents.`
 		},
 		{
 			id: 'dwarf-info-2',
@@ -67,15 +67,19 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 		FactoryLogic.feature.createMalice({
 			id: 'dwarf-malice-1',
 			name: 'Breaching Charge',
-			description: 'A dwarf can destroy one adjacent object or square of wall for every 3 malice spent. Each enemy adjacent to the destroyed object or square takes the object’s Stamina in damage (3 wood / 6 stone / 9 metal).',
 			cost: 3,
-			repeatable: true
+			repeatable: true,
+			sections: [
+				'A dwarf can destroy one adjacent object or square of wall for every 3 malice spent. Each enemy adjacent to the destroyed object or square takes the object’s Stamina in damage (3 wood / 6 stone / 9 metal).'
+			]
 		}),
 		FactoryLogic.feature.createMalice({
 			id: 'dwarf-malice-2',
 			name: 'Rappelling Barrage',
-			description: 'All dwarves acting this turn gain the climb keyword to their movement. At any point during their movement, they can make a free strike.',
-			cost: 5
+			cost: 5,
+			sections: [
+				'All dwarves acting this turn gain the climb keyword to their movement. At any point during their movement, they can make a free strike.'
+			]
 		}),
 		FactoryLogic.feature.createAbility({
 			ability: FactoryLogic.createAbility({
@@ -102,7 +106,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-1',
 			name: 'Dwarf Runner',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Defender, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Defender),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(5),
@@ -139,7 +143,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-2',
 			name: 'Dwarf Catchpole',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Brute, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Brute),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(5),
@@ -173,7 +177,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-3',
 			name: 'Dwarf Hunter',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Support, MonsterOrganizationType.Minion),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Minion, MonsterRoleType.Support),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(5),
@@ -207,7 +211,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-4',
 			name: 'Dwarf Grenadier',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Hexer, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Hexer),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 8,
 			speed: FactoryLogic.createSpeed(5),
@@ -263,7 +267,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-5',
 			name: 'Dwarf Gunner',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Artillery, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Artillery),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 12,
 			speed: FactoryLogic.createSpeed(5),
@@ -316,7 +320,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-6',
 			name: 'Dwarf Reel Winch',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Support, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Support),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 13,
 			speed: FactoryLogic.createSpeed(5),
@@ -366,7 +370,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-7',
 			name: 'Dwarf Shieldwall',
 			level: 3,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Defender, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Defender),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 21,
 			speed: FactoryLogic.createSpeed(5),
@@ -417,7 +421,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-8',
 			name: 'Dwarf Stonewhisperer',
 			level: 3,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Controller, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Controller),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 10,
 			speed: FactoryLogic.createSpeed(5),
@@ -473,7 +477,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-9',
 			name: 'Dwarf Trapper',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Harrier, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Harrier),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 6,
 			speed: FactoryLogic.createSpeed(7),
@@ -528,7 +532,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-10',
 			name: 'Dwarf Warden',
 			level: 2,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Brute, MonsterOrganizationType.Platoon),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Platoon, MonsterRoleType.Brute),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 8,
 			speed: FactoryLogic.createSpeed(5),
@@ -584,7 +588,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-11',
 			name: 'Dwarf Marauder Lord',
 			level: 3,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.NoRole, MonsterOrganizationType.Leader),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Leader),
 			keywords: [ 'Dwarf', 'Humanoid' ],
 			encounterValue: 20,
 			speed: FactoryLogic.createSpeed(5),
@@ -689,7 +693,7 @@ Legends speak of stone singers, dwarves who could move mountains with their song
 			id: 'dwarf-servitor-war-walker',
 			name: 'Servitor War Worker',
 			level: 1,
-			role: FactoryLogic.createMonsterRole(MonsterRoleType.Mount, MonsterOrganizationType.Troop),
+			role: FactoryLogic.createMonsterRole(MonsterOrganizationType.Troop, MonsterRoleType.Mount),
 			keywords: [ 'Construct', 'Dwarf' ],
 			encounterValue: 12,
 			size: FactoryLogic.createSize(3),

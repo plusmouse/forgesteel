@@ -13,6 +13,7 @@ import { DropdownButton } from '../../../controls/dropdown-button/dropdown-butto
 import { Hero } from '../../../../models/hero';
 import { HeroClass } from '../../../../models/class';
 import { HeroPanel } from '../../../panels/elements/hero-panel/hero-panel';
+import { HeroStatePage } from '../../../../enums/hero-state-page';
 import { Kit } from '../../../../models/kit';
 import { Options } from '../../../../models/options';
 import { PanelMode } from '../../../../enums/panel-mode';
@@ -28,10 +29,11 @@ interface Props {
 	heroes: Hero[];
 	sourcebooks: Sourcebook[];
 	options: Options;
+	showDirectory: () => void;
 	showAbout: () => void;
 	setOptions: (options: Options) => void;
-	exportHero: (heroId: string, format: 'image' | 'pdf' | 'json') => void;
-	deleteHero: (heroId: string) => void;
+	exportHero: (hero: Hero, format: 'image' | 'pdf' | 'json') => void;
+	deleteHero: (hero: Hero) => void;
 	showAncestry: (ancestry: Ancestry) => void;
 	showCulture: (culture: Culture) => void;
 	showCareer: (career: Career) => void;
@@ -41,16 +43,16 @@ interface Props {
 	showKit: (kit: Kit) => void;
 	showCharacteristic: (characteristic: Characteristic, hero: Hero) => void;
 	showAbility: (ability: Ability, hero: Hero) => void;
-	showHeroState: (hero: Hero, page: 'hero' | 'stats' | 'conditions') => void;
+	showHeroState: (hero: Hero, page: HeroStatePage) => void;
 	showRules: (hero: Hero) => void;
 }
 
-const getHero = (heroId: string, heroes: Hero[]) => heroes.find(h => h.id === heroId)!;
+const getHero = (heroID: string, heroes: Hero[]) => heroes.find(h => h.id === heroID)!;
 
-export const HeroPage = (props: Props) => {
+export const HeroViewPage = (props: Props) => {
 	const navigation = useNavigation();
-	const { heroId } = useParams<{ heroId: string }>();
-	const hero = useMemo(() => getHero(heroId!, props.heroes), [ heroId, props.heroes ]);
+	const { heroID } = useParams<{ heroID: string }>();
+	const hero = useMemo(() => getHero(heroID!, props.heroes), [ heroID, props.heroes ]);
 
 	try {
 		const setShowSkillsInGroups = (value: boolean) => {
@@ -79,11 +81,11 @@ export const HeroPage = (props: Props) => {
 
 		return (
 			<div className='hero-view-page'>
-				<AppHeader breadcrumbs={[ { label: 'Heroes' } ]} showAbout={props.showAbout}>
+				<AppHeader breadcrumbs={[ { label: 'Heroes' } ]} showDirectory={props.showDirectory} showAbout={props.showAbout}>
 					<Button onClick={navigation.goToHeroList}>
 						Close
 					</Button>
-					<Button onClick={() => props.showHeroState(hero, 'hero')}>
+					<Button onClick={() => props.showHeroState(hero, HeroStatePage.Hero)}>
 						State
 					</Button>
 					<Button onClick={() => props.showRules(hero)}>
@@ -115,10 +117,10 @@ export const HeroPage = (props: Props) => {
 											label: <div className='ds-text centered-text'>Export As Data</div>
 										}
 									]}
-									onClick={key => props.exportHero(heroId!, key as 'image' | 'pdf' | 'json')}
+									onClick={key => props.exportHero(hero, key as 'image' | 'pdf' | 'json')}
 								/>
-								<Button icon={<EditOutlined />} onClick={() => navigation.goToHeroEdit(heroId!)}>Edit</Button>
-								<DangerButton onConfirm={() => { props.deleteHero(heroId!); navigation.goToHeroList(); }} />
+								<Button icon={<EditOutlined />} onClick={() => navigation.goToHeroEdit(heroID!, 'details')}>Edit</Button>
+								<DangerButton block={true} onConfirm={() => props.deleteHero(hero)} />
 							</div>
 						)}
 					>
