@@ -18,23 +18,21 @@ export class PDFExport {
 
     reader.onload = async (e) => {
       const pdfDoc = await PDFDocument.load(e.target.result)
-      console.log(pdfDoc.getForm().getFields().map((a: PDFField) => a.getName()))
       const form = pdfDoc.getForm()
       for(const field of form.getFields()) {
         if(field.constructor == PDFTextField)
           field.disableRichFormatting()
       }
       const HeroLogic = (await import('../logic/hero-logic')).HeroLogic
-      console.log(HeroLogic)
       const obj = PDFExport.lastObj
       const sizeData = HeroLogic.getSize(obj)
       const texts = {
         'Character Name': obj.name,
-        'Ancestry': obj.ancestry.name,
-        'Career Top': obj.career.name,
-        'Class': obj.class.name,
-        'Subclass': obj.class.subclassName,
-        'Level': obj.class.level,
+        'Ancestry': obj.ancestry && obj.ancestry.name,
+        'Career Top': obj.career && obj.career.name,
+        'Class': obj.class && obj.class.name,
+        'Subclass': obj.class && obj.class.subclassName + ": " + obj.class.subclasses.filter(s => s.selected)[0].name,
+        'Level': obj.class && obj.class.level,
         'Wealth': obj.state.wealth,
         'Renown': obj.state.renown,
         'XP': obj.state.xp,
@@ -54,7 +52,7 @@ export class PDFExport {
       }
       const toggles = {}
 
-      // Special casing because the fields weren't properly named in order
+      // Special listing because the fields weren't properly named in order
       const victoryFields = [
         'victory1',
         'victory2',
@@ -76,15 +74,92 @@ export class PDFExport {
         toggles[victoryFields[i - 1]] = true
       }
 
+      // might/agility/reason/intuition/presence
       for(const details of obj.class.characteristics) {
+        texts['surge damage'] = Math.max(texts['surge damage'] || 0, details.value)
         texts[details.characteristic] = details.value
       }
 
+      const features = HeroLogic.getFeatures(obj)
+      const kits = HeroLogic.getKits(obj)
+      const modifiers = [
+        kits.map(f => f.name),
+        features.filter(f => f.name.match("Enchantment of")).map(f => f.name.replace("Enchantment of ", "Ench: ")),
+        features.filter(f => f.name.match("Prayer of")).map(f => f.name.replace("Prayer of ", "Prayer: ")),
+        features.filter(f => f.name.match(" Augmentation")).map(f => ("Augmentation: " + f.name.replace(" Augmentation", ""))),
+        features.filter(f => f.name.match("Ward of")).map(f => f.name.replace("Ward of ", "Ward: "))
+      ]
+      const modifierFields = [
+        "Pip 23",
+        "Pip 24",
+        "Pip 25",
+        "Pip 26",
+        "Pip 27",
+      ]
+      let modifierLabel = ""
+      for(let i = 0; i < modifiers.length; ++i) {
+        const mod = modifiers[i]
+        const field = modifierFields[i]
+        if(mod.length > 0) {
+          if(modifierLabel == "") {
+            modifierLabel = mod[0]
+          }
+          else {
+            modifierLabel = modifierLabel + ", " + mod[0]
+          }
+          toggles[field] = true
+        }
+      }
+      texts["Modifier Name"] = modifierLabel
+
+      if(kits.length > 0) {
+        texts["weapon name"] = kits[0].weapon.join("/")
+        texts["Armor name"] = kits[0].armor.join("/")
+        texts["speed 2"] = "+" + kits[0].speed
+        texts["Stability 2"] = "+" + kits[0].stability
+        texts["Mod Stamina"] = "+" + kits[0].stamina
+        texts["Area 2"] = "+" + kits[0].disengage
+        if(kits[0].meleeDistance !== null) {
+          texts["melee 2"] = "+" + kits[0].meleeDistance
+        }
+        if(kits[0].meleeDamage !== null) {
+          texts["11b"] = "+" + kits[0].meleeDamage["tier1"]
+          texts["12b"] = "+" + kits[0].meleeDamage["tier1"]
+          texts["17b"] = "+" + kits[0].meleeDamage["tier1"]
+        }
+        if(kits[0].rangedDistance !== null) {
+          texts["Ranged 3"] = "+" + kits[0].rangedDistance
+        }
+        if(kits[0].rangedDamage !== null) {
+          texts["11a"] = "+" + kits[0].rangedDamage["tier1"]
+          texts["12a"] = "+" + kits[0].rangedDamage["tier1"]
+          texts["17a"] = "+" + kits[0].rangedDamage["tier1"]
+        }
+      }
+      if(texts["Armor name"] == "" || texts["Armor name"] == undefined) {
+        texts["Armor name"] = "None"
+      }
+
+      //const abilities = HeroLogic.getAbilities(obj, false, true, true)
+
+
+
+
+
+
+
+
+
+
       for(const [key, value] of Object.entries(texts)) {
-        form.getField(key).setText(value.toString())
+        if(value !== null && value !== undefined) {
+          form.getField(key).setText(value.toString())
+        }
       }
       for(const [key, value] of Object.entries(toggles)) {
-        form.getField(key).check()
+        if(value !== null && value !== undefined) {
+          form.getField(key).check()
+        }
       }
       const data = await pdfDoc.saveAsBase64({dataUri: true})
       downloader.download = obj.name + "-character.pdf"
