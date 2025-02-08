@@ -1,4 +1,6 @@
 import { PDFDocument, PDFForm, PDFField, PDFTextField } from 'pdf-lib';
+import { FeatureType } from '../enums/feature-type';
+import { FeatureField } from '../enums/feature-field';
 
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
@@ -77,63 +79,85 @@ export class PDFExport {
       }
 
       const features = HeroLogic.getFeatures(obj)
-      const kits = HeroLogic.getKits(obj)
-      const modifiers = [
-        kits.map(f => f.name),
-        features.filter(f => f.name.match("Enchantment of")).map(f => f.name.replace("Enchantment of ", "Ench: ")),
-        features.filter(f => f.name.match("Prayer of")).map(f => f.name.replace("Prayer of ", "Prayer: ")),
-        features.filter(f => f.name.match(" Augmentation")).map(f => ("Augmentation: " + f.name.replace(" Augmentation", ""))),
-        features.filter(f => f.name.match("Ward of")).map(f => f.name.replace("Ward of ", "Ward: "))
-      ]
-      const modifierFields = [
-        "Pip 23",
-        "Pip 24",
-        "Pip 25",
-        "Pip 26",
-        "Pip 27",
-      ]
-      let modifierLabel = ""
-      for(let i = 0; i < modifiers.length; ++i) {
-        const mod = modifiers[i]
-        const field = modifierFields[i]
-        if(mod.length > 0) {
-          if(modifierLabel == "") {
-            modifierLabel = mod[0]
-          }
-          else {
-            modifierLabel = modifierLabel + ", " + mod[0]
-          }
-          toggles[field] = true
-        }
-      }
-      texts["Modifier Name"] = modifierLabel
+      {
+        const kits = HeroLogic.getKits(obj)
+        const modifiers = [
+          kits,
+          features.filter(f => f.name.match("Enchantment of")),
+          features.filter(f => f.name.match("Prayer of")),
+          features.filter(f => f.name.match(" Augmentation")),
+          features.filter(f => f.name.match("Ward of"))
+        ]
+        texts["Modifier Name"] = modifiers.filter(f => f.length > 0).map(n => n[0].name).join(", ")
+        const modifierFields = [
+          "Pip 23",
+          "Pip 24",
+          "Pip 25",
+          "Pip 26",
+          "Pip 27",
+        ]
+        let fullDescription = ""
+        let [speed, area, stability, stamina] = [0, 0, 0, 0]
 
-      if(kits.length > 0) {
-        texts["weapon name"] = kits[0].weapon.join("/")
-        texts["Armor name"] = kits[0].armor.join("/")
-        texts["speed 2"] = "+" + kits[0].speed
-        texts["Stability 2"] = "+" + kits[0].stability
-        texts["Mod Stamina"] = "+" + kits[0].stamina
-        texts["Area 2"] = "+" + kits[0].disengage
-        if(kits[0].meleeDistance !== null) {
-          texts["melee 2"] = "+" + kits[0].meleeDistance
+        for(let i = 0; i < modifiers.length; ++i) {
+          if(modifiers[i].length > 0) {
+            toggles[modifierFields[i]] = true
+            for(let feature of modifiers[i]) {
+              if(feature.type == FeatureType.Text) {
+                if(fullDescription != "") {
+                  fullDescription = fullDescription + "\n\n"
+                }
+                fullDescription = fullDescription + feature.name + ":\n" + feature.description
+              } else if(feature.type == FeatureType.Multiple) {
+                feature.data.features.map(data => data.data).filter(data => data.field == FeatureField.Speed).forEach(data => speed = speed + data.value)
+                feature.data.features.map(data => data.data).filter(data => data.field == FeatureField.Disengage).forEach(data => area = area + data.value)
+                feature.data.features.map(data => data.data).filter(data => data.field == FeatureField.Stability).forEach(data => stability = stability + data.value)
+                feature.data.features.map(data => data.data).filter(data => data.field == FeatureField.Stamina).forEach(data => stamina = stamina + data.value)
+              }
+            }
+          }
         }
-        if(kits[0].meleeDamage !== null) {
-          texts["11b"] = "+" + kits[0].meleeDamage["tier1"]
-          texts["12b"] = "+" + kits[0].meleeDamage["tier1"]
-          texts["17b"] = "+" + kits[0].meleeDamage["tier1"]
+        texts["Modifier Benefits"] = fullDescription
+
+        if(kits.length > 0) {
+          texts["weapon name"] = kits[0].weapon.join("/")
+          texts["Armor name"] = kits[0].armor.join("/")
+          speed = speed + kits[0].speed
+          stability = stability + kits[0].stability
+          stamina = stamina + kits[0].stamina
+          area = area + kits[0].disengage
+          if(kits[0].meleeDistance !== null) {
+            texts["melee 2"] = "+" + kits[0].meleeDistance
+          }
+          if(kits[0].meleeDamage !== null) {
+            texts["11b"] = "+" + kits[0].meleeDamage["tier1"]
+            texts["12b"] = "+" + kits[0].meleeDamage["tier1"]
+            texts["17b"] = "+" + kits[0].meleeDamage["tier1"]
+          }
+          if(kits[0].rangedDistance !== null) {
+            texts["Ranged 3"] = "+" + kits[0].rangedDistance
+          }
+          if(kits[0].rangedDamage !== null) {
+            texts["11a"] = "+" + kits[0].rangedDamage["tier1"]
+            texts["12a"] = "+" + kits[0].rangedDamage["tier1"]
+            texts["17a"] = "+" + kits[0].rangedDamage["tier1"]
+          }
         }
-        if(kits[0].rangedDistance !== null) {
-          texts["Ranged 3"] = "+" + kits[0].rangedDistance
+        if(texts["Armor name"] == "" || texts["Armor name"] == undefined) {
+          texts["Armor name"] = "None"
         }
-        if(kits[0].rangedDamage !== null) {
-          texts["11a"] = "+" + kits[0].rangedDamage["tier1"]
-          texts["12a"] = "+" + kits[0].rangedDamage["tier1"]
-          texts["17a"] = "+" + kits[0].rangedDamage["tier1"]
+        if(speed > 0) {
+          texts["speed 2"] = "+" + speed
         }
-      }
-      if(texts["Armor name"] == "" || texts["Armor name"] == undefined) {
-        texts["Armor name"] = "None"
+        if(area > 0) {
+          texts["Area 2"] = "+" + area
+        }
+        if(stability > 0) {
+          texts["Stability 2"] = "+" + stability
+        }
+        if(stamina > 0) {
+          texts["Mod Stamina"] = "+" + stamina
+        }
       }
 
       //const abilities = HeroLogic.getAbilities(obj, false, true, true)
@@ -162,14 +186,16 @@ export class PDFExport {
         form.acroForm.removeField(raw)
         const newField0 = form.createTextField("Ancestry Full")
         newField0.acroField.Kids().push(ref0)
-        newField0.addToPage(pdfDoc.getPage(0))
         const newField1 = form.createTextField("Ancestry Top")
         newField1.acroField.Kids().push(ref1)
-        newField1.addToPage(pdfDoc.getPage(0))
+      }
+      {
+        form.getField("Modifier Name").setFontSize(0)
+        form.getField("Modifier Benefits").setFontSize(0)
       }
 
       for(const [key, value] of Object.entries(texts)) {
-        if(value) {
+        if(value !== null && value !== undefined) {
           form.getField(key).setText(value.toString())
         }
       }
