@@ -18,17 +18,13 @@ export class PDFExport {
 
     reader.onload = async (e) => {
       const pdfDoc = await PDFDocument.load(e.target.result)
-      const form = pdfDoc.getForm()
-      for(const field of form.getFields()) {
-        if(field.constructor == PDFTextField)
-          field.disableRichFormatting()
-      }
+
       const HeroLogic = (await import('../logic/hero-logic')).HeroLogic
       const obj = PDFExport.lastObj
       const sizeData = HeroLogic.getSize(obj)
       const texts = {
         'Character Name': obj.name,
-        'Ancestry': obj.ancestry && obj.ancestry.name,
+        'Ancestry Top': obj.ancestry && obj.ancestry.name,
         'Career Top': obj.career && obj.career.name,
         'Class': obj.class && obj.class.name,
         'Subclass': obj.class && obj.class.subclassName + ": " + obj.class.subclasses.filter(s => s.selected)[0].name,
@@ -150,14 +146,35 @@ export class PDFExport {
 
 
 
+      const form = pdfDoc.getForm()
+      for(const field of form.getFields()) {
+        if(field.constructor == PDFTextField) {
+          field.disableRichFormatting()
+        }
+      }
+
+      {
+        // Workaround for PDF having 2 fields named "Ancestry"
+        const raw = form.getField("Ancestry").acroField
+        const kids = raw.Kids()
+        const ref0 = kids.get(0)
+        const ref1 = kids.get(1)
+        form.acroForm.removeField(raw)
+        const newField0 = form.createTextField("Ancestry Full")
+        newField0.acroField.Kids().push(ref0)
+        newField0.addToPage(pdfDoc.getPage(0))
+        const newField1 = form.createTextField("Ancestry Top")
+        newField1.acroField.Kids().push(ref1)
+        newField1.addToPage(pdfDoc.getPage(0))
+      }
 
       for(const [key, value] of Object.entries(texts)) {
-        if(value !== null && value !== undefined) {
+        if(value) {
           form.getField(key).setText(value.toString())
         }
       }
       for(const [key, value] of Object.entries(toggles)) {
-        if(value !== null && value !== undefined) {
+        if(value) {
           form.getField(key).check()
         }
       }
