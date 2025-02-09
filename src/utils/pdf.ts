@@ -22,65 +22,70 @@ export class PDFExport {
       const pdfDoc = await PDFDocument.load(e.target.result)
 
       const HeroLogic = (await import('../logic/hero-logic')).HeroLogic
-      const obj = PDFExport.lastObj
-      const sizeData = HeroLogic.getSize(obj)
+      const FeatureLogic = (await import('../logic/feature-logic')).FeatureLogic
+      const hero = PDFExport.lastObj
+      const sizeData = HeroLogic.getSize(hero)
       const texts = {
-        'Character Name': obj.name,
-        'Ancestry Top': obj.ancestry && obj.ancestry.name,
-        'Career Top': obj.career && obj.career.name,
-        'Class': obj.class && obj.class.name,
-        'Subclass': obj.class && obj.class.subclassName + ": " + obj.class.subclasses.filter(s => s.selected)[0].name,
-        'Level': obj.class && obj.class.level,
-        'Wealth': obj.state.wealth,
-        'Renown': obj.state.renown,
-        'XP': obj.state.xp,
-        'top speed': HeroLogic.getSpeed(obj),
-        'top stability': HeroLogic.getStability(obj),
+        'Character Name': hero.name,
+        'Ancestry Top': hero.ancestry && hero.ancestry.name,
+        'Career Top': hero.career && hero.career.name,
+        'Class': hero.class && hero.class.name,
+        'Subclass': hero.class && hero.class.subclassName + ": " + hero.class.subclasses.filter(s => s.selected)[0].name,
+        'Level': hero.class && hero.class.level,
+        'Wealth': hero.state.wealth,
+        'Renown': hero.state.renown,
+        'XP': hero.state.xp,
+        'top speed': HeroLogic.getSpeed(hero),
+        'top stability': HeroLogic.getStability(hero),
         'top size': sizeData.value + sizeData.mod,
-        'Current Stamina': HeroLogic.getStamina(obj) - obj.state.staminaDamage,
-        'stamina max': HeroLogic.getStamina(obj),
-        'winded count': Math.floor(HeroLogic.getStamina(obj) / 2),
-        'dying count': -Math.floor(HeroLogic.getStamina(obj) / 2),
-        'recov stamina': HeroLogic.getRecoveryValue(obj),
-        'recov max': HeroLogic.getRecoveries(obj),
-        'Recoveries': HeroLogic.getRecoveries(obj) - obj.state.recoveriesUsed,
-        'resource name': obj.class.heroicResource,
-        'Resource Count': obj.state.heroicResource,
-        'Surges': obj.state.surges,
+        'Current Stamina': HeroLogic.getStamina(hero) - hero.state.staminaDamage,
+        'stamina max': HeroLogic.getStamina(hero),
+        'winded count': Math.floor(HeroLogic.getStamina(hero) / 2),
+        'dying count': -Math.floor(HeroLogic.getStamina(hero) / 2),
+        'recov stamina': HeroLogic.getRecoveryValue(hero),
+        'recov max': HeroLogic.getRecoveries(hero),
+        'Recoveries': HeroLogic.getRecoveries(hero) - hero.state.recoveriesUsed,
+        'resource name': hero.class.heroicResource,
+        'Resource Count': hero.state.heroicResource,
+        'Surges': hero.state.surges,
       }
       const toggles = {}
 
-      // Special listing because the fields weren't properly named in order
-      const victoryFields = [
-        'victory1',
-        'victory2',
-        'victory3',
-        'victory4',
-        'Victory 13',
-        'victory5',
-        'victory6',
-        'victory7',
-        'victory8',
-        'victory9',
-        'victory10',
-        'victory11',
-        'victory12',
-        'victory14',
-        'victory15'
-      ]
-      for(let i = 1; i <= obj.state.victories && i <= victoryFields.length; ++i) {
-        toggles[victoryFields[i - 1]] = true
-      }
+      const ignoredFeatures = {}
 
-      // might/agility/reason/intuition/presence
-      for(const details of obj.class.characteristics) {
-        texts['surge damage'] = Math.max(texts['surge damage'] || 0, details.value)
-        texts[details.characteristic] = details.value
-      }
-
-      const features = HeroLogic.getFeatures(obj)
       {
-        const kits = HeroLogic.getKits(obj)
+        // Special listing because the fields weren't properly named in order
+        const victoryFields = [
+          'victory1',
+          'victory2',
+          'victory3',
+          'victory4',
+          'Victory 13',
+          'victory5',
+          'victory6',
+          'victory7',
+          'victory8',
+          'victory9',
+          'victory10',
+          'victory11',
+          'victory12',
+          'victory14',
+          'victory15'
+        ]
+        for(let i = 1; i <= hero.state.victories && i <= victoryFields.length; ++i) {
+          toggles[victoryFields[i - 1]] = true
+        }
+
+        // might/agility/reason/intuition/presence
+        for(const details of hero.class.characteristics) {
+          texts['surge damage'] = Math.max(texts['surge damage'] || 0, details.value)
+          texts[details.characteristic] = details.value
+        }
+      }
+
+      const features = HeroLogic.getFeatures(hero)
+      {
+        const kits = HeroLogic.getKits(hero)
         const modifiers = [
           kits,
           features.filter(f => f.name.match("Enchantment of")),
@@ -104,11 +109,13 @@ export class PDFExport {
             toggles[modifierFields[i]] = true
             for(let feature of modifiers[i]) {
               if(feature.type == FeatureType.Text) {
+                ignoredFeatures[feature.id] = true
                 if(fullDescription != "") {
                   fullDescription = fullDescription + "\n\n"
                 }
-                fullDescription = fullDescription + feature.name + ":\n" + feature.description
+                fullDescription = fullDescription + "==" + feature.name + "==" + "\n" + feature.description
               } else if(feature.type == FeatureType.Multiple) {
+                ignoredFeatures[feature.id] = true
                 feature.data.features.map(data => data.data).filter(data => data.field == FeatureField.Speed).forEach(data => speed = speed + data.value)
                 feature.data.features.map(data => data.data).filter(data => data.field == FeatureField.Disengage).forEach(data => area = area + data.value)
                 feature.data.features.map(data => data.data).filter(data => data.field == FeatureField.Stability).forEach(data => stability = stability + data.value)
@@ -160,7 +167,24 @@ export class PDFExport {
         }
       }
 
-      //const abilities = HeroLogic.getAbilities(obj, false, true, true)
+      {
+        // Roughly split the features between the boxes, with a bias for the
+        // first box, no abilities, only description-only features
+        const classTextFeatures = FeatureLogic.getFeaturesFromClass(hero.class, hero).filter(f => f.type == FeatureType.Text).filter(f => !ignoredFeatures[f.id])
+        let all = ""
+        for(const feature of classTextFeatures) {
+          if(all != "") {
+            all = all + "\n\n"
+          }
+          // substitution is to convert any tables into text that presents
+          // better in the PDF form
+          all = all + "==" + feature.name + "==" + "\n\n" + feature.description.replace(/(\|\:\-+)+\|\n/g, "").replace(/\|\s+(.+?)\s+\| (.+?)\s+\|/g, "$1 | $2")
+        }
+        const lines = all.split(/\n+/)
+        const halfway = Math.ceil((lines.length + 1)/ 2)
+        texts["Class Features 1"] = lines.slice(0, halfway).join("\n\n")
+        texts["Class Features 2"] = lines.slice(halfway).join("\n\n")
+      }
 
 
 
@@ -192,6 +216,10 @@ export class PDFExport {
       {
         form.getField("Modifier Name").setFontSize(0)
         form.getField("Modifier Benefits").setFontSize(0)
+        form.getField("Class Features 1").setFontSize(0)
+        if(texts["Class Features 2"] != "") {
+          form.getField("Class Features 2").setFontSize(0)
+        }
       }
 
       for(const [key, value] of Object.entries(texts)) {
@@ -205,7 +233,7 @@ export class PDFExport {
         }
       }
       const data = await pdfDoc.saveAsBase64({dataUri: true})
-      downloader.download = obj.name + "-character.pdf"
+      downloader.download = hero.name + "-character.pdf"
       downloader.href = data
       downloader.click()
     }
