@@ -1,5 +1,6 @@
 import { PDFDocument, PDFForm, PDFField, PDFTextField, PDFName, PDFFont, StandardFontEmbedder, PDFDict, PDFRef, PDFString } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
+import { ConditionType, ConditionEndType } from '../enums/condition-type';
 import { FeatureType } from '../enums/feature-type';
 import { FeatureField } from '../enums/feature-field';
 
@@ -158,7 +159,7 @@ export class PDFExport {
     }
 
     let ConvertFeatures = function(features) {
-      features = features.filter(f => f.type == FeatureType.Text).filter(f => !ignoredFeatures[f.id])
+      features = features.filter(f => f.type == FeatureType.Text || f.type == FeatureType.DamageModifier).filter(f => !ignoredFeatures[f.id])
       let all = ""
       for(const feature of features) {
         if(all != "") {
@@ -200,8 +201,30 @@ export class PDFExport {
 
     {
       const ancestryTextFeatures = FeatureLogic.getFeaturesFromAncestry(hero.ancestry, hero)
+      console.log(ancestryTextFeatures)
       texts["Ancestry Full"] = ConvertFeatures(ancestryTextFeatures)
       console.log(texts["Ancestry Full"])
+    }
+
+    {
+      const conditionMap = {
+        [ConditionType.Bleeding]: ["Pip 01", "Pip 12"],
+        [ConditionType.Dazed]: ["Pip 02", "Pip 13"],
+        [ConditionType.Frightened]: ["Pip 03", "Pip14"],
+        [ConditionType.Grabbed]: ["Pip 04", "Pip 15"],
+        [ConditionType.Prone]: ["Pip 05", "Pip 16"],
+        [ConditionType.Restrained]: ["Pip 06", "Pip 17"],
+        [ConditionType.Slowed]: ["Pip 07", "Pip 18"],
+        [ConditionType.Taunted]: ["Pip 08", "Pip 19"],
+        [ConditionType.Weakened]: ["Pip 09", "Pip 20"],
+      }
+      for(const c of hero.state.conditions) {
+        if(c.ends == ConditionEndType.EndOfTurn) {
+          toggles[conditionMap[c.type][1]] = true
+        } else if(c.end == ConditionEndType.SaveEnds) {
+          toggles[conditionMap[c.type][0]] = true
+        }
+      }
     }
 
 
