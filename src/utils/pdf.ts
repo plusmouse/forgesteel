@@ -4,6 +4,7 @@ import { ConditionType, ConditionEndType } from '../enums/condition-type';
 import { FeatureType } from '../enums/feature-type';
 import { FeatureField } from '../enums/feature-field';
 import { AbilityUsage } from '../enums/ability-usage';
+import localforage from 'localforage';
 
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
@@ -11,38 +12,40 @@ const downloader = document.createElement('a');
 
 export class PDFExport {
   static startExport = async (hero: unknown) => {
-    const pdfAsBytes = await fetch('/forgesteel/assets/character-sheet-backer-packet-2.pdf').then(res => res.arrayBuffer())
+    const pdfAsBytes = await fetch('/forgesteel/assets/character-sheet-backer-packet-2-modified.pdf').then(res => res.arrayBuffer())
     const pdfDoc = await PDFDocument.load(pdfAsBytes)
 
     const HeroLogic = (await import('../logic/hero-logic')).HeroLogic
     const FeatureLogic = (await import('../logic/feature-logic')).FeatureLogic
     const AbilityLogic = (await import('../logic/ability-logic')).AbilityLogic
+    const Sourcebook = (await import('../models/sourcebook')).Sourcebook
+    const SourcebookData = (await import('../data/sourcebook-data')).SourcebookData
 
     const autoResizingFields = []
     const markMultiline = []
     const sizeData = HeroLogic.getSize(hero)
     const texts = {
-      'Character Name': hero.name,
-      'Ancestry Top': hero.ancestry && hero.ancestry.name,
-      'Career Top': hero.career && hero.career.name,
-      'Class': hero.class && hero.class.name,
-      'Subclass': hero.class && hero.class.subclassName + ': ' + hero.class.subclasses.filter(s => s.selected)[0].name,
+      'CharacterName': hero.name,
+      'AncestryTop': hero.ancestry && hero.ancestry.name,
+      'CareerTop': hero.career && hero.career.name,
+      'ClassTop': hero.class && hero.class.name,
+      'SubclassTop': hero.class && hero.class.subclassName + ': ' + hero.class.subclasses.filter(s => s.selected)[0].name,
       'Level': hero.class && hero.class.level,
       'Wealth': hero.state.wealth,
       'Renown': hero.state.renown,
       'XP': hero.state.xp,
-      'top speed': HeroLogic.getSpeed(hero),
-      'top stability': HeroLogic.getStability(hero),
-      'top size': sizeData.value + sizeData.mod,
-      'Current Stamina': HeroLogic.getStamina(hero) - hero.state.staminaDamage,
-      'stamina max': HeroLogic.getStamina(hero),
-      'winded count': Math.floor(HeroLogic.getStamina(hero) / 2),
-      'dying count': -Math.floor(HeroLogic.getStamina(hero) / 2),
-      'recov stamina': HeroLogic.getRecoveryValue(hero),
-      'recov max': HeroLogic.getRecoveries(hero),
+      'Speed': HeroLogic.getSpeed(hero),
+      'Stability': HeroLogic.getStability(hero),
+      'Size': sizeData.value + sizeData.mod,
+      'CurrentStamina': HeroLogic.getStamina(hero) - hero.state.staminaDamage,
+      'MaxStamina': HeroLogic.getStamina(hero),
+      'WindedValue': Math.floor(HeroLogic.getStamina(hero) / 2),
+      'DeadValue': -Math.floor(HeroLogic.getStamina(hero) / 2),
+      'RecoveryValue': HeroLogic.getRecoveryValue(hero),
+      'MaxRecoveries': HeroLogic.getRecoveries(hero),
       'Recoveries': HeroLogic.getRecoveries(hero) - hero.state.recoveriesUsed,
-      'resource name': hero.class.heroicResource,
-      'Resource Count': hero.state.heroicResource,
+      'HeroicResourceName': hero.class.heroicResource,
+      'HeroicResource': hero.state.heroicResource,
       'Surges': hero.state.surges,
     }
     const toggles = {}
@@ -50,31 +53,13 @@ export class PDFExport {
     const ignoredFeatures = {}
 
     {
-      // Special listing because the fields weren't properly named in order
-      const victoryFields = [
-        'victory1',
-        'victory2',
-        'victory3',
-        'victory4',
-        'Victory 13',
-        'victory5',
-        'victory6',
-        'victory7',
-        'victory8',
-        'victory9',
-        'victory10',
-        'victory11',
-        'victory12',
-        'victory14',
-        'victory15'
-      ]
-      for(let i = 1; i <= hero.state.victories && i <= victoryFields.length; ++i) {
-        toggles[victoryFields[i - 1]] = true
+      for(let i = 0; i < hero.state.victories && i < 15; ++i) {
+        toggles['Victories' + (i + 1)] = true
       }
 
       // might/agility/reason/intuition/presence
       for(const details of hero.class.characteristics) {
-        texts['surge damage'] = Math.max(texts['surge damage'] || 0, details.value)
+        texts['SurgeDamage'] = Math.max(texts['SurgeDamage'] || 0, details.value)
         texts[details.characteristic] = details.value
       }
     }
@@ -89,14 +74,14 @@ export class PDFExport {
         features.filter(f => f.name.match(' Augmentation')),
         features.filter(f => f.name.match('Ward of'))
       ]
-      texts['Modifier Name'] = modifiers.filter(f => f.length > 0).map(n => n[0].name).join(', ')
-      autoResizingFields.push('Modifier Name')
+      texts['ModifierName'] = modifiers.filter(f => f.length > 0).map(n => n[0].name).join(', ')
+      autoResizingFields.push('ModifierName')
       const modifierFields = [
-        'Pip 23',
-        'Pip 24',
-        'Pip 25',
-        'Pip 26',
-        'Pip 27',
+        'ModifierKit',
+        'ModifierEnchantment',
+        'ModifierPrayer',
+        'ModifierAugmentation',
+        'ModifierWard',
       ]
       let fullDescription = ''
       let [speed, area, stability, stamina] = [0, 0, 0, 0]
@@ -121,47 +106,47 @@ export class PDFExport {
           }
         }
       }
-      texts['Modifier Benefits'] = fullDescription
-      autoResizingFields.push('Modifier Benefits')
+      texts['ModifierBenefits'] = fullDescription
+      autoResizingFields.push('ModifierBenefits')
 
       if(kits.length > 0) {
-        texts['weapon name'] = kits[0].weapon.join('/')
-        texts['Armor name'] = kits[0].armor.join('/')
+        texts['ModifierWeapon'] = kits[0].weapon.join('/')
+        texts['ModifierArmor'] = kits[0].armor.join('/')
         speed = speed + kits[0].speed
         stability = stability + kits[0].stability
         stamina = stamina + kits[0].stamina
         area = area + kits[0].disengage
         if(kits[0].meleeDistance !== null) {
-          texts['melee 2'] = '+' + kits[0].meleeDistance
+          texts['ModifierMeleeRange'] = '+' + kits[0].meleeDistance
         }
         if(kits[0].meleeDamage !== null) {
-          texts['11b'] = '+' + kits[0].meleeDamage['tier1']
-          texts['12b'] = '+' + kits[0].meleeDamage['tier1']
-          texts['17b'] = '+' + kits[0].meleeDamage['tier1']
+          texts['ModifierMeleeTier1'] = '+' + kits[0].meleeDamage.tier1
+          texts['ModifierMeleeTier2'] = '+' + kits[0].meleeDamage.tier2
+          texts['ModifierMeleeTier3'] = '+' + kits[0].meleeDamage.tier3
         }
         if(kits[0].rangedDistance !== null) {
-          texts['Ranged 3'] = '+' + kits[0].rangedDistance
+          texts['ModifierRangedRange'] = '+' + kits[0].rangedDistance
         }
         if(kits[0].rangedDamage !== null) {
-          texts['11a'] = '+' + kits[0].rangedDamage['tier1']
-          texts['12a'] = '+' + kits[0].rangedDamage['tier1']
-          texts['17a'] = '+' + kits[0].rangedDamage['tier1']
+          texts['ModifierRangedTier1'] = '+' + kits[0].rangedDamage.tier1
+          texts['ModifierRangedTier2'] = '+' + kits[0].rangedDamage.tier2
+          texts['ModifierRangedTier3'] = '+' + kits[0].rangedDamage.tier3
         }
       }
-      if(texts['Armor name'] == '' || texts['Armor name'] == undefined) {
-        texts['Armor name'] = 'None'
+      if(texts['ModifierArmor'] == '' || texts['ModifierArmor'] == undefined) {
+        texts['ModifierArmor'] = 'None'
       }
       if(speed > 0) {
-        texts['speed 2'] = '+' + speed
+        texts['ModifierSpeed'] = '+' + speed
       }
       if(area > 0) {
-        texts['Area 2'] = '+' + area
+        texts['ModifierAreaRange'] = '+' + area
       }
       if(stability > 0) {
-        texts['Stability 2'] = '+' + stability
+        texts['ModifierStability'] = '+' + stability
       }
       if(stamina > 0) {
-        texts['Mod Stamina'] = '+' + stamina
+        texts['ModifierStamina'] = '+' + stamina
       }
     }
 
@@ -203,99 +188,98 @@ export class PDFExport {
       if(lines[splitPoint - 1].match(/^==/)) {
         splitPoint = splitPoint - 1
       }
-      texts['Class Features 1'] = lines.slice(0, splitPoint).join('\n\n').replace(/\n\n\[\[/g, '\n[[')
-      autoResizingFields.push('Class Features 1')
-      texts['Class Features 2'] = lines.slice(splitPoint).join('\n\n').replace(/\n\n\[\[/g, '\n[[')
-      if(texts['Class Features 2'] != '') {
-        autoResizingFields.push('Class Features 2')
+      texts['ClassFeatures1'] = lines.slice(0, splitPoint).join('\n\n').replace(/\n\n\[\[/g, '\n[[')
+      autoResizingFields.push('ClassFeatures1')
+      texts['ClassFeatures2'] = lines.slice(splitPoint).join('\n\n').replace(/\n\n\[\[/g, '\n[[')
+      if(texts['ClassFeatures2'] != '') {
+        autoResizingFields.push('ClassFeatures2')
       }
     }
 
     {
       const ancestryTextFeatures = FeatureLogic.getFeaturesFromAncestry(hero.ancestry, hero)
-      texts['Ancestry Full'] = ConvertFeatures(ancestryTextFeatures.filter(f => f.type == FeatureType.Text || f.type == FeatureType.DamageModifier))
+      texts['AncestryTraits'] = ConvertFeatures(ancestryTextFeatures.filter(f => f.type == FeatureType.Text || f.type == FeatureType.DamageModifier))
     }
 
     {
-      const conditionMap = {
-        [ConditionType.Bleeding]: ['Pip 01', 'Pip 12'],
-        [ConditionType.Dazed]: ['Pip 02', 'Pip 13'],
-        [ConditionType.Frightened]: ['Pip 03', 'Pip14'],
-        [ConditionType.Grabbed]: ['Pip 04', 'Pip 15'],
-        [ConditionType.Prone]: ['Pip 05', 'Pip 16'],
-        [ConditionType.Restrained]: ['Pip 06', 'Pip 17'],
-        [ConditionType.Slowed]: ['Pip 07', 'Pip 18'],
-        [ConditionType.Taunted]: ['Pip 08', 'Pip 19'],
-        [ConditionType.Weakened]: ['Pip 09', 'Pip 20'],
-      }
       for(const c of hero.state.conditions) {
         if(c.ends == ConditionEndType.EndOfTurn) {
-          toggles[conditionMap[c.type][1]] = true
+          toggles[c.type + "EoT"] = true
         } else if(c.end == ConditionEndType.SaveEnds) {
-          toggles[conditionMap[c.type][0]] = true
+          toggles[c.type + "Save"] = true
         }
       }
     }
 
-    //
-    // XXX Do background stuff
-    //
+    {
+      const homebrew = (await localforage.getItem<Sourcebook[]>('forgesteel-homebrew-settings')) as Sourcebook[]
+      const books = [SourcebookData.core, SourcebookData.orden]
+      if(homebrew)
+        books.push(...homebrew)
+      const skills = HeroLogic.getSkills(hero, books)
+      console.log(skills)
+      skills.map(s => s.name.replace(" ", "")).forEach(s => toggles["Skill" + s] = true)
+    }
 
     {
-      const SetTiers = (ability, tierKeys, powerRollKey, distanceKey) => {
+      const SetTiers = (ability, prefix) => {
+        ignoredFeatures[ability.id] = true
         if(ability.powerRoll) {
-          texts[tierKeys[0]] = AbilityLogic.getTierEffect(ability.powerRoll.tier1, 1, ability, hero)
-          texts[tierKeys[1]] = AbilityLogic.getTierEffect(ability.powerRoll.tier2, 2, ability, hero)
-          texts[tierKeys[2]] = AbilityLogic.getTierEffect(ability.powerRoll.tier3, 3, ability, hero)
-          texts[powerRollKey] = Math.max(...ability.powerRoll.characteristic.map(c => hero.class.characteristics.find(d => d.characteristic == c).value))
+          texts[prefix + "Tier1"] = AbilityLogic.getTierEffect(ability.powerRoll.tier1, 1, ability, hero)
+          texts[prefix + "Tier2"] = AbilityLogic.getTierEffect(ability.powerRoll.tier2, 2, ability, hero)
+          texts[prefix + "Tier3"] = AbilityLogic.getTierEffect(ability.powerRoll.tier3, 3, ability, hero)
+          texts[prefix + "PowerRoll"] = Math.max(...ability.powerRoll.characteristic.map(c => hero.class.characteristics.find(d => d.characteristic == c).value))
         }
-        texts[distanceKey] = AbilityLogic.getDistance(ability.distance[0], hero, ability)
+        texts[prefix + "Distance"] = AbilityLogic.getDistance(ability.distance[0], hero, ability)
 
       }
-      const CleanMelee = (tierKeys, distanceKey) => {
-        texts[tierKeys[0]] = texts[tierKeys[0]].replace(' damage', '')
-        texts[tierKeys[1]] = texts[tierKeys[1]].replace(' damage', '')
-        texts[tierKeys[2]] = texts[tierKeys[2]].replace(' damage', '')
-        texts[distanceKey] = texts[distanceKey].replace('Melee ', '').replace('Ranged ', '')
+      const CleanMelee = (prefix) => {
+        texts[prefix + "Tier1"] = texts[prefix + "Tier1"].replace(' damage', '')
+        texts[prefix + "Tier2"] = texts[prefix + "Tier2"].replace(' damage', '')
+        texts[prefix + "Tier3"] = texts[prefix + "Tier3"].replace(' damage', '')
+        texts[prefix + "Distance"] = texts[prefix + "Distance"].replace('Melee ', '').replace('Ranged ', '')
       }
-      const ApplyGroup = (abilities, slots) => {
+      const ApplyGroup = (abilities, groupPrefix, limit) => {
         abilities.forEach((a, i) => {
-          SetTiers(a, slots[i].tiers, slots[i].powerRoll, slots[i].distance)
-          texts[slots[i].label] = a.name
-          texts[slots[i].target] = a.target
-          texts[slots[i].keywords] = a.keywords.join(', ')
-          texts[slots[i].type] = a.type.usage
-          texts[slots[i].effect] = a.effect
-          if(slots[i].cost) {
-            texts[slots[i].cost] = a.cost
+          if(i >= limit) {
+            return
           }
-          autoResizingFields.push(slots[i].type)
-          autoResizingFields.push(slots[i].keywords)
-          autoResizingFields.push(slots[i].target)
-          autoResizingFields.push(...slots[i].tiers.filter(t => texts[t]))
-          markMultiline.push(...slots[i].tiers.filter(t => texts[t] && texts[t].length > 30))
+          const prefix = groupPrefix + (i+1)
+          SetTiers(a, prefix)
+          texts[prefix + "Name"] = a.name
+          texts[prefix + "Target"] = a.target
+          texts[prefix + "Keywords"] = a.keywords.join(', ')
+          texts[prefix + "Type"] = a.type.usage
+          if(a.type.trigger !== "") {
+            texts[prefix + "Trigger"] = a.type.trigger
+          }
+          texts[prefix + "Effect"] = a.effect
+          if(a.spend.length > 0) {
+            texts[prefix + "Effect"] = a.effect + "\n\n[[Spend " + a.spend[0].value + "]] " + a.spend[0].effect
+          }
+          if(typeof(a.cost) == "number" && a.cost > 0) {
+            texts[prefix + "Cost"] = a.cost
+          }
+          autoResizingFields.push(prefix + "Type")
+          autoResizingFields.push(prefix + "Keywords")
+          autoResizingFields.push(prefix + "Target")
+          autoResizingFields.push(...["Tier1", "Tier2", "Tier3"].map(t => prefix + t).filter(t => texts[t]))
+          markMultiline.push(...["Tier1", "Tier2", "Tier3"].map(t => prefix + t).filter(t => texts[t] && texts[t].length > 30))
         })
       }
       const abilities = HeroLogic.getAbilities(hero, true, true, false)
       const freeMelee = abilities.find(a => a.id == 'free-melee')
-      SetTiers(freeMelee, ['lessthan11', 'equalto11', 'greatherthan11'], 'Power Roll 11', 'Distance 1')
-      CleanMelee(['lessthan11', 'equalto11', 'greatherthan11'], 'Distance 1')
+      SetTiers(freeMelee, "MeleeFreeStrike")
+      CleanMelee("MeleeFreeStrike")
       const freeRanged = abilities.find(a => a.id == 'free-ranged')
-      SetTiers(freeRanged, ['lessthan9', 'equalto9', 'greatherthan9'], 'Power Roll 9', 'Distance 4')
-      CleanMelee(['lessthan9', 'equalto9', 'greatherthan9'], 'Distance 4')
+      SetTiers(freeRanged, "RangedFreeStrike")
+      CleanMelee("RangedFreeStrike")
 
-      const signatureSlots = [
-        {label: 'Ability Name 1', keywords: 'Keywords 1', type: 'Type 1', distance: 'Distance 2', target: 'Target 1', powerRoll: 'Power Roll 10', tiers: ['lessthan10', 'equalto10', 'greatherthan10'], effect: 'Effect 1'},
-        {label: 'Ability Name 14', keywords: 'Keywords 3', type: 'Type 3', distance: 'Distance 5', target: 'Target 3', powerRoll: 'Power Roll 8', tiers: ['lessthan8', 'equalto8', 'greatherthan8'], effect: 'Effect 3'},
-      ]
-      ApplyGroup(abilities.filter(a => a.cost == 'signature'), signatureSlots)
+      ApplyGroup(abilities.filter(a => a.cost == 'signature'), "Signature", 2)
 
-      const heroicSlots = [
-        {label: 'Ability Name 2', keywords: 'Keywords 2', type: 'Type 2', distance: 'Distance 3', target: 'Target 2', powerRoll: 'Power Roll 12', tiers: ['lessthan12', 'equalto12', 'greatherthan12'], effect: 'Effect 2', cost: 'Cost 1'},
-        {label: 'Ability Name 3', keywords: 'Keywords 4', type: 'Type 4', distance: 'Distance 6', target: 'Target 4', powerRoll: 'Power Roll 7', tiers: ['lessthan7', 'equalto7', 'greatherthan7'], effect: 'Effect 4', cost: 'Cost 2'},
-        {label: 'Ability Name 6', keywords: 'Keywords 11', type: 'Type 11', distance: 'Distance 13', target: 'Target 11', powerRoll: 'Power Roll 4', tiers: ['lessthan4', 'equalto4', 'greatherthan4'], effect: 'Effect 14', cost: 'Cost 5'},
-      ]
-      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0), heroicSlots)
+      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && a.type.usage == AbilityUsage.Action), "Heroic", 5)
+      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && a.type.usage == AbilityUsage.Trigger), "TriggeredHeroic", 1)
+      ApplyGroup(abilities.filter(a => !ignoredFeatures[a.id]), "Ability", 6)
     }
 
 
@@ -318,32 +302,12 @@ export class PDFExport {
     const font = await pdfDoc.embedFont(fontAsBytes)
 
     {
-      // Workaround for PDF having 2 fields named 'Ancestry'
-      const raw = form.getField('Ancestry').acroField
-      const kids = raw.Kids()
-      const ref0 = kids.get(0)
-      const ref1 = kids.get(1)
-      form.acroForm.removeField(raw)
-      const newField0 = form.createTextField('Ancestry Full')
-      newField0.acroField.Kids().push(ref0)
-      newField0.defaultUpdateAppearances(font)
-      newField0.enableMultiline()
-      newField0.setFontSize(6)
-      const newField1 = form.createTextField('Ancestry Top')
-      newField1.acroField.Kids().push(ref1)
-    }
-    {
-      autoResizingFields.forEach(f => form.getField(f).setFontSize(0))
+      autoResizingFields.forEach(f => {
+        const field = form.getField(f)
+        field.defaultUpdateAppearances(font)
+        field.setFontSize(0)
+      })
       markMultiline.forEach(f => form.getField(f).enableMultiline(0))
-    }
-    {
-      // Fix fields being multiline when they shouldn't
-      form.getField('Class').disableMultiline()
-      form.getField('Subclass').disableMultiline()
-      form.getField('Career Top').disableMultiline()
-      form.getField('Wealth').disableMultiline()
-      form.getField('Renown').disableMultiline()
-      form.getField('XP').disableMultiline()
     }
 
     for(const [key, value] of Object.entries(texts)) {
