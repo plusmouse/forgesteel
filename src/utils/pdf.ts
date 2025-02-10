@@ -207,9 +207,9 @@ export class PDFExport {
     {
       for(const c of hero.state.conditions) {
         if(c.ends == ConditionEndType.EndOfTurn) {
-          toggles[c.type + "EoT"] = true
+          toggles[c.type + 'EoT'] = true
         } else if(c.end == ConditionEndType.SaveEnds) {
-          toggles[c.type + "Save"] = true
+          toggles[c.type + 'Save'] = true
         }
       }
     }
@@ -220,25 +220,111 @@ export class PDFExport {
       if(homebrew)
         books.push(...homebrew)
       const skills = HeroLogic.getSkills(hero, books)
-      skills.forEach(s => toggles["Skill" + s.name.replace(" ", "")] = true)
+      skills.forEach(s => toggles['Skill' + s.name.replace(' ', '')] = true)
+
+      if(hero.career) {
+        texts['CareerName'] = hero.career.name
+        const incident = hero.career.incitingIncidents.options.find(o => o.id == hero.career.incitingIncidents.selectedID)
+        if(incident) {
+          texts['CareerIncident'] = '==' + incident.name + '==\n\n' + incident.description
+        }
+      }
+      if(hero.complication) {
+        texts['ComplicationName'] = hero.complication.name
+        texts['ComplicationBenefit'] = hero.complication.features.find(f => f.name.match(/Benefit/)).description
+        texts['ComplicationDrawback'] = hero.complication.features.find(f => f.name.match(/Drawback/)).description
+      }
+      if(hero.culture) {
+        if(hero.culture.environment) {
+          texts['Environment'] = hero.culture.environment.name
+          texts['EnvironmentDescription'] = hero.culture.environment.description
+          autoResizingFields.push('EnvironmentDescription')
+        }
+        if(hero.culture.organization) {
+          texts['Organization'] = hero.culture.organization.name
+          texts['OrganizationDescription'] = hero.culture.organization.description
+          autoResizingFields.push('OrganizationDescription')
+        }
+        if(hero.culture.upbringing) {
+          texts['Upbringing'] = hero.culture.upbringing.name
+          texts['UpbringingDescription'] = hero.culture.upbringing.description
+          autoResizingFields.push('UpbringingDescription')
+        }
+      }
+      const languages = HeroLogic.getLanguages(hero, books)
+      texts['Languages'] = languages.map(l => l.name).join('\n')
+
+      const perks = features.filter(f => f.type == FeatureType.Perk && f.data.selected.length > 0).map(f => f.data.selected[0])
+      let all = ConvertFeatures(perks)
+      const lines = all.split(/\n+/)
+      let splitPoint = 0
+      let runningTotal = 0
+      for(const l of lines) {
+        runningTotal = runningTotal + l.length
+        if(runningTotal < all.length/2) {
+          splitPoint = splitPoint + 1
+        } else {
+          break
+        }
+      }
+      // Ensure headers remain on the same line
+      if(lines[splitPoint - 1].match(/^==/)) {
+        splitPoint = splitPoint - 1
+      }
+      texts['Perks1'] = lines.slice(0, splitPoint).join('\n\n').replace(/\n\n\[\[/g, '\n[[')
+      autoResizingFields.push('Perks1')
+      texts['Perks2'] = lines.slice(splitPoint).join('\n\n').replace(/\n\n\[\[/g, '\n[[')
+      if(texts['Perks2'] != '') {
+        autoResizingFields.push('Perks2')
+      }
+
+      texts['Titles'] = features
+        .filter(f => f.type == FeatureType.TitleChoice).map(f => f.data.selected[0])
+        .map(f => {
+          let text = '==' + f.name + ', '
+          console.log(f.features, console.log(f))
+          const selected = f.features.find(subF => subF.id == f.selectedFeatureID)
+          if(selected) {
+            text = text + selected.name + '==\n' + selected.description
+            return text
+          }
+          return text + 'choice needed=='
+        }).join('\n\n')
+      if(texts['Titles'] != '') {
+        autoResizingFields.push('Titles')
+      }
+
+      hero.state.projects.forEach((p, i) => {
+        texts['Project' + (i+1)] = p.name
+        if(p.progress.prerequisites && p.progress.source) {
+          texts['Project' + (i+1) + 'Required'] = p.goal
+          autoResizingFields.push('Project' + (i+1) + 'Required')
+          texts['Project' + (i+1) + 'Current'] = p.progress.points
+          autoResizingFields.push('Project' + (i+1) + 'Current')
+          texts['Project' + (i+1) + 'Assigned'] = 'Yes'
+        } else {
+          texts['Project' + (i+1) + 'Assigned'] = 'Pending (' + [!p.progress.prerequisites && 'Prerequisites', !p.progress.source && 'Source'].filter(a => a).join(', ') + ')'
+        }
+        texts['Project' + (i+1) + 'Roll'] = p.characteristic.map(c => c[0]).join('/')
+      })
     }
 
     {
       const SetTiers = (ability, prefix) => {
         if(ability.powerRoll) {
-          texts[prefix + "Tier1"] = AbilityLogic.getTierEffect(ability.powerRoll.tier1, 1, ability, hero)
-          texts[prefix + "Tier2"] = AbilityLogic.getTierEffect(ability.powerRoll.tier2, 2, ability, hero)
-          texts[prefix + "Tier3"] = AbilityLogic.getTierEffect(ability.powerRoll.tier3, 3, ability, hero)
-          texts[prefix + "PowerRoll"] = Math.max(...ability.powerRoll.characteristic.map(c => hero.class.characteristics.find(d => d.characteristic == c).value))
+          texts[prefix + 'Tier1'] = AbilityLogic.getTierEffect(ability.powerRoll.tier1, 1, ability, hero)
+          texts[prefix + 'Tier2'] = AbilityLogic.getTierEffect(ability.powerRoll.tier2, 2, ability, hero)
+          texts[prefix + 'Tier3'] = AbilityLogic.getTierEffect(ability.powerRoll.tier3, 3, ability, hero)
+          texts[prefix + 'PowerRoll'] = Math.max(...ability.powerRoll.characteristic.map(c => hero.class.characteristics.find(d => d.characteristic == c).value))
         }
-        texts[prefix + "Distance"] = AbilityLogic.getDistance(ability.distance[0], hero, ability)
+        texts[prefix + 'Distance'] = AbilityLogic.getDistance(ability.distance[0], hero, ability)
 
       }
       const CleanMelee = (prefix) => {
-        texts[prefix + "Tier1"] = texts[prefix + "Tier1"].replace(' damage', '')
-        texts[prefix + "Tier2"] = texts[prefix + "Tier2"].replace(' damage', '')
-        texts[prefix + "Tier3"] = texts[prefix + "Tier3"].replace(' damage', '')
-        texts[prefix + "Distance"] = texts[prefix + "Distance"].replace('Melee ', '').replace('Ranged ', '')
+        texts[prefix + 'Tier1'] = texts[prefix + 'Tier1'].replace(' damage', '')
+        texts[prefix + 'Tier2'] = texts[prefix + 'Tier2'].replace(' damage', '')
+        texts[prefix + 'Tier3'] = texts[prefix + 'Tier3'].replace(' damage', '')
+        texts[prefix + 'Distance'] = texts[prefix + 'Distance'].replace('Melee ', '').replace('Ranged ', '')
       }
       const ApplyGroup = (abilities, groupPrefix, limit) => {
         abilities.forEach((a, i) => {
@@ -249,52 +335,52 @@ export class PDFExport {
           const prefix = groupPrefix + (i+1)
           SetTiers(a, prefix)
           console.log(prefix, a.name)
-          texts[prefix + "Name"] = a.name
-          texts[prefix + "Target"] = a.target
-          texts[prefix + "Keywords"] = a.keywords.join(', ')
-          texts[prefix + "Type"] = a.type.usage
-          if(a.type.trigger !== "") {
-            texts[prefix + "Trigger"] = a.type.trigger
-            if(texts[prefix + "Trigger"].length > 90) {
-              autoResizingFields.push(prefix + "Trigger")
+          texts[prefix + 'Name'] = a.name
+          texts[prefix + 'Target'] = a.target
+          texts[prefix + 'Keywords'] = a.keywords.join(', ')
+          texts[prefix + 'Type'] = a.type.usage
+          if(a.type.trigger !== '') {
+            texts[prefix + 'Trigger'] = a.type.trigger
+            if(texts[prefix + 'Trigger'].length > 90) {
+              autoResizingFields.push(prefix + 'Trigger')
             }
           }
-          texts[prefix + "Effect"] = a.effect
+          texts[prefix + 'Effect'] = a.effect
           if(a.spend.length > 0) {
             if(a.effect.length > 0)
-              texts[prefix + "Effect"] = a.effect + "\n\n[[Spend " + a.spend[0].value + "]] " + a.spend[0].effect
+              texts[prefix + 'Effect'] = a.effect + '\n\n[[Spend ' + a.spend[0].value + ']] ' + a.spend[0].effect
             else
-              texts[prefix + "Effect"] = "[[Spend " + a.spend[0].value + "]] " + a.spend[0].effect
+              texts[prefix + 'Effect'] = '[[Spend ' + a.spend[0].value + ']] ' + a.spend[0].effect
           }
-          if(typeof(a.cost) == "number" && a.cost > 0) {
-            texts[prefix + "Cost"] = a.cost
+          if(typeof(a.cost) == 'number' && a.cost > 0) {
+            texts[prefix + 'Cost'] = a.cost
           }
-          if(texts[prefix + "Effect"].length > 145) {
-            autoResizingFields.push(prefix + "Effect")
+          if(texts[prefix + 'Effect'].length > 145) {
+            autoResizingFields.push(prefix + 'Effect')
           }
-          autoResizingFields.push(prefix + "Type")
-          autoResizingFields.push(prefix + "Keywords")
-          autoResizingFields.push(prefix + "Target")
-          autoResizingFields.push(...["Tier1", "Tier2", "Tier3"].map(t => prefix + t).filter(t => texts[t]))
-          markMultiline.push(...["Tier1", "Tier2", "Tier3"].map(t => prefix + t).filter(t => texts[t] && texts[t].length > 30))
+          autoResizingFields.push(prefix + 'Type')
+          autoResizingFields.push(prefix + 'Keywords')
+          autoResizingFields.push(prefix + 'Target')
+          autoResizingFields.push(...['Tier1', 'Tier2', 'Tier3'].map(t => prefix + t).filter(t => texts[t]))
+          markMultiline.push(...['Tier1', 'Tier2', 'Tier3'].map(t => prefix + t).filter(t => texts[t] && texts[t].length > 30))
         })
       }
       const abilities = HeroLogic.getAbilities(hero, true, true, false)
       const freeMelee = abilities.find(a => a.id == 'free-melee')
       ignoredFeatures[freeMelee.id] = true
-      SetTiers(freeMelee, "MeleeFreeStrike")
-      CleanMelee("MeleeFreeStrike")
+      SetTiers(freeMelee, 'MeleeFreeStrike')
+      CleanMelee('MeleeFreeStrike')
       const freeRanged = abilities.find(a => a.id == 'free-ranged')
       ignoredFeatures[freeRanged.id] = true
-      SetTiers(freeRanged, "RangedFreeStrike")
-      CleanMelee("RangedFreeStrike")
+      SetTiers(freeRanged, 'RangedFreeStrike')
+      CleanMelee('RangedFreeStrike')
 
-      ApplyGroup(abilities.filter(a => a.cost == 'signature'), "Signature", 2)
+      ApplyGroup(abilities.filter(a => a.cost == 'signature'), 'Signature', 2)
 
-      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && a.type.usage == AbilityUsage.Trigger), "TriggeredHeroic", 1)
-      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && !ignoredFeatures[a.id]), "Heroic", 5)
-      ApplyGroup(abilities.filter(a => a.type.usage == AbilityUsage.Trigger && !ignoredFeatures[a.id]), "Triggered", 2)
-      ApplyGroup(abilities.filter(a => !ignoredFeatures[a.id]), "Ability", 6)
+      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && a.type.usage == AbilityUsage.Trigger), 'TriggeredHeroic', 1)
+      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && !ignoredFeatures[a.id]), 'Heroic', 5)
+      ApplyGroup(abilities.filter(a => a.type.usage == AbilityUsage.Trigger && !ignoredFeatures[a.id]), 'Triggered', 2)
+      ApplyGroup(abilities.filter(a => !ignoredFeatures[a.id]), 'Ability', 6)
     }
 
 
