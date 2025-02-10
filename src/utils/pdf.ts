@@ -61,8 +61,11 @@ export class PDFExport {
       for(const details of hero.class.characteristics) {
         texts['SurgeDamage'] = Math.max(texts['SurgeDamage'] || 0, details.value)
         texts[details.characteristic] = details.value
+        autoResizingFields.push(details.characteristic)
       }
+      autoResizingFields.push('SurgeDamage')
     }
+    autoResizingFields.push(...['CurrentStamina', 'Recoveries', 'HeroicResource', 'Surges', 'Level'])
 
     const features = HeroLogic.getFeatures(hero)
     {
@@ -217,13 +220,11 @@ export class PDFExport {
       if(homebrew)
         books.push(...homebrew)
       const skills = HeroLogic.getSkills(hero, books)
-      console.log(skills)
-      skills.map(s => s.name.replace(" ", "")).forEach(s => toggles["Skill" + s] = true)
+      skills.forEach(s => toggles["Skill" + s.name.replace(" ", "")] = true)
     }
 
     {
       const SetTiers = (ability, prefix) => {
-        ignoredFeatures[ability.id] = true
         if(ability.powerRoll) {
           texts[prefix + "Tier1"] = AbilityLogic.getTierEffect(ability.powerRoll.tier1, 1, ability, hero)
           texts[prefix + "Tier2"] = AbilityLogic.getTierEffect(ability.powerRoll.tier2, 2, ability, hero)
@@ -241,24 +242,35 @@ export class PDFExport {
       }
       const ApplyGroup = (abilities, groupPrefix, limit) => {
         abilities.forEach((a, i) => {
+          ignoredFeatures[a.id] = true
           if(i >= limit) {
             return
           }
           const prefix = groupPrefix + (i+1)
           SetTiers(a, prefix)
+          console.log(prefix, a.name)
           texts[prefix + "Name"] = a.name
           texts[prefix + "Target"] = a.target
           texts[prefix + "Keywords"] = a.keywords.join(', ')
           texts[prefix + "Type"] = a.type.usage
           if(a.type.trigger !== "") {
             texts[prefix + "Trigger"] = a.type.trigger
+            if(texts[prefix + "Trigger"].length > 90) {
+              autoResizingFields.push(prefix + "Trigger")
+            }
           }
           texts[prefix + "Effect"] = a.effect
           if(a.spend.length > 0) {
-            texts[prefix + "Effect"] = a.effect + "\n\n[[Spend " + a.spend[0].value + "]] " + a.spend[0].effect
+            if(a.effect.length > 0)
+              texts[prefix + "Effect"] = a.effect + "\n\n[[Spend " + a.spend[0].value + "]] " + a.spend[0].effect
+            else
+              texts[prefix + "Effect"] = "[[Spend " + a.spend[0].value + "]] " + a.spend[0].effect
           }
           if(typeof(a.cost) == "number" && a.cost > 0) {
             texts[prefix + "Cost"] = a.cost
+          }
+          if(texts[prefix + "Effect"].length > 145) {
+            autoResizingFields.push(prefix + "Effect")
           }
           autoResizingFields.push(prefix + "Type")
           autoResizingFields.push(prefix + "Keywords")
@@ -269,16 +281,19 @@ export class PDFExport {
       }
       const abilities = HeroLogic.getAbilities(hero, true, true, false)
       const freeMelee = abilities.find(a => a.id == 'free-melee')
+      ignoredFeatures[freeMelee.id] = true
       SetTiers(freeMelee, "MeleeFreeStrike")
       CleanMelee("MeleeFreeStrike")
       const freeRanged = abilities.find(a => a.id == 'free-ranged')
+      ignoredFeatures[freeRanged.id] = true
       SetTiers(freeRanged, "RangedFreeStrike")
       CleanMelee("RangedFreeStrike")
 
       ApplyGroup(abilities.filter(a => a.cost == 'signature'), "Signature", 2)
 
-      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && a.type.usage == AbilityUsage.Action), "Heroic", 5)
       ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && a.type.usage == AbilityUsage.Trigger), "TriggeredHeroic", 1)
+      ApplyGroup(abilities.filter(a => typeof(a.cost) == 'number' && a.cost > 0 && !ignoredFeatures[a.id]), "Heroic", 5)
+      ApplyGroup(abilities.filter(a => a.type.usage == AbilityUsage.Trigger && !ignoredFeatures[a.id]), "Triggered", 2)
       ApplyGroup(abilities.filter(a => !ignoredFeatures[a.id]), "Ability", 6)
     }
 
@@ -301,22 +316,34 @@ export class PDFExport {
     pdfDoc.registerFontkit(fontkit)
     const font = await pdfDoc.embedFont(fontAsBytes)
 
-    {
-      autoResizingFields.forEach(f => {
-        const field = form.getField(f)
-        field.defaultUpdateAppearances(font)
-        field.setFontSize(0)
-      })
-      markMultiline.forEach(f => form.getField(f).enableMultiline(0))
-    }
-
     for(const [key, value] of Object.entries(texts)) {
       const field = form.getField(key)
       if(value !== null && value !== undefined) {
         field.setText(value.toString())
       }
-      field.defaultUpdateAppearances(font)
     }
+
+    form.getFields().forEach(field => {
+      if(field.setFontSize) {
+        field.defaultUpdateAppearances(font)
+        field.setFontSize(7)
+        field.defaultUpdateAppearances(font)
+      }
+    })
+
+    {
+      markMultiline.forEach(f => {
+        const field = form.getField(f)
+        field.enableMultiline(0)
+        field.defaultUpdateAppearances(font)
+      })
+      autoResizingFields.forEach(f => {
+        const field = form.getField(f)
+        field.setFontSize(0)
+        field.defaultUpdateAppearances(font)
+      })
+    }
+
     for(const [key, value] of Object.entries(toggles)) {
       if(value) {
         form.getField(key).check()

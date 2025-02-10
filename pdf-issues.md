@@ -1,5 +1,6 @@
 Order of awkwardness when trying to make a character sheet automatically
 ## Important
+- Missing skills for Carpentry and Cooking
 - No spot for a heroic triggered action (an issue because the heroic slots don't
   include a "trigger" spot, and the supplied triggered ability slot is already
   used for another ability)
